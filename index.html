@@ -1,0 +1,1555 @@
+<!DOCTYPE html>
+<html lang="mn">
+<head>
+<title>БМТС захиалга, хүргэлт</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#00834A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ДТЛ захиалга">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-180.png">
+<style>
+/* Layout: Odoo 19 вэб клиентийн загвар, Эрдэнэт үйлдвэрийн ногоон өнгөөр — нүүр дэлгэцийн апп дүрснүүд, дээд цэс, жагсаалт, маягт (statusbar, notebook, chatter) */
+:root{
+  --brand:#00834A; --brand-d:#006638; --brand-l:#E2F3EA;
+  --bg:#F1F2F4; --sheet:#FFFFFF; --ink:#212529; --mute:#6C757D; --line:#DEE2E6; --line2:#EEF0F2;
+  --ok:#1E8E4E; --ok-bg:#E1F3E8; --warn:#B76E00; --warn-bg:#FFF2D9; --err:#C0392B; --err-bg:#FBE5E3;
+  --info:#017E84; --info-bg:#DDF2F3; --nav:#FFFFFF; --home1:#DDF0E5; --home2:#EAF3EE;
+  --font:-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --brand:#3FB57C; --brand-d:#6FD3A2; --brand-l:#1C3A2B;
+  --bg:#1B1D21; --sheet:#262A2F; --ink:#E6E8EB; --mute:#9AA2AB; --line:#3A3F46; --line2:#30353B;
+  --ok:#5CC98A; --ok-bg:#1F3A2B; --warn:#F0B44C; --warn-bg:#3D3020; --err:#F08A7E; --err-bg:#3D2422;
+  --info:#5CC5CA; --info-bg:#1E3739; --nav:#262A2F; --home1:#16261E; --home2:#1B2420; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --brand:#3FB57C; --brand-d:#6FD3A2; --brand-l:#1C3A2B;
+  --bg:#1B1D21; --sheet:#262A2F; --ink:#E6E8EB; --mute:#9AA2AB; --line:#3A3F46; --line2:#30353B;
+  --ok:#5CC98A; --ok-bg:#1F3A2B; --warn:#F0B44C; --warn-bg:#3D3020; --err:#F08A7E; --err-bg:#3D2422;
+  --info:#5CC5CA; --info-bg:#1E3739; --nav:#262A2F; --home1:#16261E; --home2:#1B2420; color-scheme:dark}
+*{box-sizing:border-box}
+html,body{min-height:100%}
+body{background:var(--bg);color:var(--ink);font:15px/1.45 var(--font);-webkit-tap-highlight-color:transparent}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:30;background:var(--nav)}
+button,input,select,textarea{font:inherit;color:inherit}
+a{color:var(--brand);text-decoration:none}
+/* ---- дээд цэс ---- */
+.nav{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:var(--nav);border-bottom:1px solid var(--line);
+  display:flex;align-items:center;gap:8px;height:48px;padding-left:max(8px,env(safe-area-inset-left,0px));padding-right:max(8px,env(safe-area-inset-right,0px))}
+.nav .grid-btn{width:38px;height:38px;border:0;background:transparent;border-radius:8px;display:grid;place-items:center;cursor:pointer}
+.nav .grid-btn:hover{background:var(--line2)}
+.nav .app-name{font-weight:600;font-size:16px;flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nav .icon-btn{position:relative;width:38px;height:38px;border:0;background:transparent;border-radius:8px;display:grid;place-items:center;cursor:pointer}
+.nav .badge-n{position:absolute;top:3px;right:2px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:var(--err);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center}
+.avatar{width:30px;height:30px;border-radius:6px;background:var(--brand);color:#fff;font-weight:700;font-size:13px;display:grid;place-items:center;flex:none}
+/* ---- агуулга ---- */
+.wrap{max-width:900px;margin:0 auto;padding-block:12px 40px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.crumb{font-size:13px;color:var(--mute);margin:2px 0 8px}
+.crumb a{color:var(--info)}
+h1.title{font-size:22px;margin:0 0 4px;text-wrap:balance}
+/* ---- нүүр: апп дүрснүүд ---- */
+.home{min-height:calc(100vh - 48px);background:linear-gradient(160deg,var(--home1),var(--home2))}
+.home .wrap{padding-top:22px}
+.hello{font-size:14px;color:var(--mute);margin-bottom:18px;text-align:center}
+.apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(92px,1fr));gap:22px 10px;max-width:640px;margin:0 auto}
+.app{display:flex;flex-direction:column;align-items:center;gap:8px;border:0;background:transparent;cursor:pointer;padding:4px;border-radius:12px;position:relative}
+.app:focus-visible{outline:2px solid var(--brand)}
+.app .ic{width:64px;height:64px;border-radius:14px;display:grid;place-items:center;box-shadow:0 1px 2px rgba(0,0,0,.12),0 4px 10px rgba(0,0,0,.06)}
+.app .ic svg{width:34px;height:34px}
+.app span{font-size:13px;text-align:center;line-height:1.2}
+.app .dot{position:absolute;top:0;right:14px;min-width:20px;height:20px;border-radius:10px;background:var(--err);color:#fff;font-size:11px;font-weight:700;display:grid;place-items:center;padding:0 5px}
+/* ---- товч ---- */
+.btn{border:1px solid transparent;border-radius:6px;padding:7px 14px;font-weight:600;font-size:14px;cursor:pointer;background:var(--line2);color:var(--ink);white-space:nowrap}
+.btn:hover{filter:brightness(.97)}
+.btn.primary{background:var(--brand);color:#fff}
+.btn.ok{background:var(--ok);color:#fff}
+.btn.danger{background:transparent;border-color:var(--err);color:var(--err)}
+.btn.block{display:block;width:100%;padding:12px;font-size:16px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:focus-visible{outline:2px solid var(--brand);outline-offset:2px}
+.cp{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:4px 0 10px}
+.cp .sp{flex:1}
+/* ---- statusbar (Odoo сум) ---- */
+.statusbar{display:flex;overflow-x:auto;margin:0 0 10px;border:1px solid var(--line);border-radius:6px;background:var(--sheet);scrollbar-width:none}
+.statusbar::-webkit-scrollbar{display:none}
+.statusbar span{flex:none;padding:6px 18px 6px 22px;font-size:12.5px;color:var(--mute);position:relative;white-space:nowrap;
+  clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%,10px 50%);margin-left:-8px;background:var(--sheet)}
+.statusbar span:first-child{margin-left:0;clip-path:polygon(0 0,calc(100% - 10px) 0,100% 50%,calc(100% - 10px) 100%,0 100%)}
+.statusbar span.done{color:var(--ink)}
+.statusbar span.cur{background:var(--brand-l);color:var(--brand);font-weight:700}
+/* ---- sheet ---- */
+.sheet{background:var(--sheet);border:1px solid var(--line);border-radius:8px;padding:16px;position:relative;overflow:hidden}
+.sheet h2{font-size:22px;margin:0 0 10px;font-variant-numeric:tabular-nums}
+.ribbon{position:absolute;top:14px;right:-34px;transform:rotate(45deg);padding:3px 40px;font-size:11px;font-weight:700;color:#fff;background:var(--err);letter-spacing:.04em}
+.ribbon.ok{background:var(--ok)}
+.fields{display:grid;grid-template-columns:1fr 1fr;gap:4px 24px}
+@media (max-width:620px){.fields{grid-template-columns:1fr}}
+.f{display:grid;grid-template-columns:42% 1fr;gap:8px;padding:5px 0;border-bottom:1px solid var(--line2);font-size:14px}
+.f label{color:var(--mute);font-weight:500}
+.f div{min-width:0;overflow-wrap:anywhere}
+.alert{border-radius:6px;padding:10px 12px;margin:0 0 12px;font-size:14px}
+.alert.info{background:var(--info-bg);color:var(--info)}
+.alert.warn{background:var(--warn-bg);color:var(--warn)}
+.alert.ok{background:var(--ok-bg);color:var(--ok)}
+.alert.err{background:var(--err-bg);color:var(--err)}
+/* ---- notebook ---- */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:16px 0 0;overflow-x:auto}
+.tabs button{border:1px solid transparent;border-bottom:0;background:transparent;padding:8px 12px;border-radius:6px 6px 0 0;cursor:pointer;color:var(--mute);white-space:nowrap;font-size:14px}
+.tabs button.on{border-color:var(--line);background:var(--sheet);color:var(--ink);font-weight:600;margin-bottom:-1px}
+.tabpane{padding-top:8px}
+/* ---- хүснэгт ---- */
+.tbl-wrap{overflow-x:auto}
+table.t{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+table.t th{text-align:left;font-weight:600;color:var(--mute);border-bottom:1px solid var(--line);padding:7px 6px;white-space:nowrap;font-size:13px}
+table.t td{border-bottom:1px solid var(--line2);padding:8px 6px;vertical-align:middle}
+table.t td.n,table.t th.n{text-align:right}
+table.t input{width:76px;text-align:right;padding:5px 6px;border:1px solid var(--line);border-radius:5px;background:var(--sheet)}
+.sub{font-size:12px;color:var(--mute)}
+/* ---- жагсаалт ---- */
+.list{background:var(--sheet);border:1px solid var(--line);border-radius:8px;overflow:hidden}
+.row{display:flex;gap:10px;align-items:center;padding:11px 14px;border-bottom:1px solid var(--line2);cursor:pointer}
+.row:last-child{border-bottom:0}
+.row:hover{background:var(--line2)}
+.row .main{flex:1;min-width:0}
+.row .top{display:flex;gap:8px;align-items:baseline}
+.row .no{font-weight:600;font-variant-numeric:tabular-nums}
+.row .meta{font-size:13px;color:var(--mute);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{display:inline-block;padding:2px 9px;border-radius:12px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--line2);color:var(--mute)}
+.pill.info{background:var(--info-bg);color:var(--info)}
+.pill.ok{background:var(--ok-bg);color:var(--ok)}
+.pill.warn{background:var(--warn-bg);color:var(--warn)}
+.pill.err{background:var(--err-bg);color:var(--err)}
+.pill.brand{background:var(--brand-l);color:var(--brand)}
+.filters{display:flex;gap:6px;overflow-x:auto;margin:0 0 10px}
+.filters button{border:1px solid var(--line);background:var(--sheet);border-radius:16px;padding:5px 12px;font-size:13px;cursor:pointer;white-space:nowrap}
+.filters button.on{background:var(--brand);border-color:var(--brand);color:#fff}
+.empty{background:var(--sheet);border:1px dashed var(--line);border-radius:8px;padding:28px 16px;text-align:center;color:var(--mute)}
+.empty b{display:block;color:var(--ink);font-size:16px;margin-bottom:4px}
+/* ---- chatter ---- */
+.chatter{margin-top:14px}
+.chatter h3{font-size:14px;margin:0 0 8px;color:var(--mute);font-weight:600}
+.msg{display:flex;gap:10px;padding:8px 0;border-bottom:1px solid var(--line2)}
+.msg .avatar{width:28px;height:28px;font-size:12px}
+.msg .who{font-weight:600;font-size:13.5px}
+.msg .when{font-size:12px;color:var(--mute);margin-left:6px}
+.msg .body{font-size:14px}
+/* ---- маягт ---- */
+.form-grid{display:grid;gap:10px}
+.inp{display:grid;gap:4px}
+.inp label{font-size:13px;color:var(--mute);font-weight:500}
+.inp input,.inp select,.inp textarea{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:6px;background:var(--sheet)}
+.inp input:focus,.inp select:focus,.inp textarea:focus{outline:2px solid var(--brand-l);border-color:var(--brand)}
+.line-add{display:grid;grid-template-columns:1fr 90px auto;gap:6px;align-items:end}
+/* ---- хүргэлт ---- */
+.stop{border:1px solid var(--line);border-radius:8px;padding:12px;margin:10px 0;background:var(--sheet)}
+.stop .hd{display:flex;align-items:center;gap:10px}
+.stop .seq{width:28px;height:28px;border-radius:50%;background:var(--brand);color:#fff;font-weight:700;display:grid;place-items:center;flex:none}
+.stop .hd .nm{flex:1;min-width:0;font-weight:600}
+.road{height:8px;border-radius:4px;background:var(--line2);overflow:hidden;margin:10px 0 4px}
+.road i{display:block;height:100%;background:var(--brand);border-radius:4px;transition:width .6s}
+.qr{display:grid;place-items:center;gap:6px;padding:12px;background:#fff;border-radius:8px;border:1px solid var(--line);margin:10px auto;max-width:280px}
+.qr .code{font:700 22px/1 ui-monospace,Menlo,Consolas,monospace;letter-spacing:.18em;color:#111}
+.qr small{color:#555;text-align:center}
+.big-plate{font:800 34px/1.1 ui-monospace,Menlo,Consolas,monospace;text-align:center;letter-spacing:.04em;margin:6px 0}
+/* ---- тайлан ---- */
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:12px}
+.kpi{background:var(--sheet);border:1px solid var(--line);border-radius:8px;padding:12px}
+.kpi .v{font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.kpi .l{font-size:12.5px;color:var(--mute)}
+.bars{display:grid;gap:8px}
+.bar{display:grid;grid-template-columns:minmax(0,46%) 1fr 64px;gap:8px;align-items:center;font-size:13px}
+.bar .tr{height:12px;background:var(--line2);border-radius:6px;overflow:hidden}
+.bar .tr i{display:block;height:100%;background:var(--brand)}
+.bar .v{text-align:right;font-variant-numeric:tabular-nums;color:var(--mute)}
+/* ---- мэдэгдэл, toast ---- */
+.toast{position:fixed;left:50%;transform:translateX(-50%);top:calc(env(safe-area-inset-top,0px) + 56px);z-index:50;width:min(92vw,420px);
+  background:var(--sheet);border:1px solid var(--line);border-left:4px solid var(--brand);border-radius:10px;box-shadow:0 8px 28px rgba(0,0,0,.18);padding:10px 12px;cursor:pointer;animation:drop .25s ease-out}
+.toast .tt{font-weight:700;font-size:14px}
+.toast .tb{font-size:13.5px;color:var(--mute)}
+@keyframes drop{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
+@media (prefers-reduced-motion:reduce){.toast{animation:none}.road i{transition:none}}
+.ntf{display:flex;gap:10px;padding:11px 14px;border-bottom:1px solid var(--line2);cursor:pointer}
+.ntf.unread{background:var(--brand-l)}
+.ntf .tt{font-weight:600;font-size:14px}
+.ntf .tb{font-size:13.5px}
+.ntf .when{font-size:12px;color:var(--mute)}
+/* ---- нэвтрэх ---- */
+.login{max-width:440px;margin:24px auto}
+.roles{display:grid;gap:6px}
+.roles label{display:flex;gap:10px;align-items:center;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--sheet);cursor:pointer}
+.roles input{accent-color:var(--brand)}
+.roles .rd{font-size:12.5px;color:var(--mute)}
+.mode{font-size:12.5px;color:var(--mute);text-align:center;margin-top:8px}
+.confirm{margin-top:10px;padding:12px;border:1px solid var(--err);border-radius:8px;background:var(--err-bg)}
+.rmap{margin:10px 0;background:var(--line2);border:1px solid var(--line);border-radius:8px;padding:6px}
+.rmap svg{width:100%;height:auto;display:block}
+.rmap polyline{fill:none;stroke:var(--mute);stroke-width:2;stroke-linejoin:round;opacity:.55}
+.rmap polyline.cur{stroke:var(--warn);stroke-width:3.5;opacity:1}
+.rmap polyline.done{stroke:var(--ok);opacity:.8}
+.rmap circle{fill:var(--brand);stroke:var(--sheet);stroke-width:2}.rmap circle.done{fill:var(--ok)}
+.rmap rect{fill:var(--ink)}
+.rmap text{fill:#fff;font-size:10px;font-weight:700;text-anchor:middle}
+.rmap text.lb{fill:var(--ink);font-size:9.5px;font-weight:600;paint-order:stroke;stroke:var(--line2);stroke-width:3px}
+.rmap figcaption{font-size:11.5px;color:var(--mute);padding:4px 4px 0}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg label{position:relative;cursor:pointer}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{display:block;border:1.5px solid var(--line);border-radius:8px;padding:10px;background:var(--sheet);height:100%}
+.seg small{display:block;font-size:12px;color:var(--mute);margin-top:2px;font-weight:400}
+.seg input:checked+span{border-color:var(--brand);background:var(--brand-l)}
+.seg label.u input:checked+span{border-color:var(--err);background:var(--err-bg)}
+.seg input:focus-visible+span{outline:2px solid var(--brand);outline-offset:2px}
+.phase{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:10px 0}
+.phase>div{border:1px solid var(--line);border-radius:8px;padding:10px;background:var(--sheet)}
+.phase .v{font-size:20px;font-weight:700}.phase .l{font-size:12px;color:var(--mute)}
+.phase .n{font-size:11.5px;color:var(--mute);margin-top:4px}
+.retbox{border:1px dashed var(--warn);border-radius:8px;padding:8px 10px;margin-top:10px;background:var(--warn-bg)}
+.tl{display:flex;gap:4px;margin:10px 0;font-size:12px}
+.tl span{flex:1;text-align:center;padding:6px 2px;border-radius:6px;background:var(--line2);color:var(--mute)}
+.tl span.done{background:var(--ok-bg);color:var(--ok);font-weight:600}.tl span.cur{background:var(--brand-l);color:var(--brand);font-weight:700}
+@media (max-width:520px){.phase{grid-template-columns:1fr}}
+.lad{list-style:none;margin:8px 0 0;padding:0}
+.lad li{display:flex;gap:10px;padding:9px 8px;border-radius:8px}
+.lad .n{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:700;font-size:13px;flex:none;background:var(--line2);color:var(--mute)}
+.lad li.done .n{background:var(--brand);color:#fff}
+.lad li.cur{background:var(--warn-bg)}.lad li.cur .n{background:var(--warn);color:#fff}
+.lad li.rej{background:var(--err-bg)}.lad li.rej .n{background:var(--err);color:#fff}
+.lad li.work .n{background:none;border:2px dashed var(--line);font-size:0}
+.lad li.work.done .n{border-style:solid;border-color:var(--brand);background:none}
+.lad li.lock .t,.lad li.lock .d{color:var(--mute)}
+.lad .b{flex:1;min-width:0}.lad .t{font-weight:600}.lad li.work .t{font-weight:400}
+.lad .d{font-size:12.5px;color:var(--mute)}.lad .s{font-size:12.5px;margin-top:2px}
+.sigp{height:8px;border-radius:4px;background:var(--line2);overflow:hidden;margin:6px 0 2px}.sigp i{display:block;height:100%;background:var(--brand)}
+.stamp{display:inline-block;border:2px solid var(--brand);color:var(--brand);border-radius:6px;padding:2px 8px;font-size:12px;font-weight:700;letter-spacing:.3px}
+.sms{background:var(--sheet);border:1px solid var(--line);border-radius:14px 14px 14px 4px;padding:10px 12px;margin:0 40px 10px 0;font-size:14px}
+.sms .when{display:block;font-size:11.5px;color:var(--mute);margin-top:4px}
+</style>
+</head>
+<body>
+
+<div id="app" aria-live="polite"></div>
+<div id="toast-slot"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.14.1/firebase-firestore-compat.js"></script>
+<script>
+"use strict";
+/* ===================== Тохиргоо (лавлах өгөгдөл) ===================== */
+const ART_URL = ""; // хуваалцах холбоос (QR-д ашиглана)
+const DEPTS = {
+  uhc: {name:"Ус хангамжийн цех", lat:49.048963, lng:104.148408, km:2.43, route:[[49.04285,104.14074],[49.04242,104.1403],[49.03911,104.14458],[49.03953,104.14525],[49.04011,104.14505],[49.04072,104.14556],[49.04229,104.14811],[49.04298,104.14523],[49.04522,104.14206],[49.04654,104.14793],[49.04882,104.14675],[49.04918,104.14821],[49.04899,104.14837]]},
+  zmz_mech: {name:"Засвар механикийн завод", lat:49.041217, lng:104.150203, km:1.1, route:[[49.04241,104.14032],[49.0391,104.14458],[49.03951,104.14526],[49.0401,104.14504],[49.04071,104.1456],[49.04231,104.14815],[49.042,104.14801],[49.04172,104.14944]]},
+  zmz_cast: {hidden:true, name:"ЗМЗ Цутгуурын цех", lat:49.040099, lng:104.149763, km:1.27, route:[[49.04242,104.14031],[49.0391,104.14458],[49.03952,104.14528],[49.04012,104.14506],[49.04071,104.14553],[49.0423,104.14816],[49.04197,104.14804],[49.04176,104.14926],[49.04021,104.14846]]},
+  ghe: {name:"Геологи хайгуул экспедиц", lat:49.045242, lng:104.149803, km:1.45, route:[[49.04242,104.1403],[49.0391,104.14457],[49.03951,104.14523],[49.04011,104.14502],[49.04072,104.14552],[49.04423,104.15124],[49.04528,104.15063],[49.04529,104.14978]]},
+  att_ttg: {name:"АТЦ: Технологийн тээврийн авто засварын хэсэг", lat:49.034902, lng:104.14462, km:1.55, route:[[49.04243,104.14032],[49.03885,104.14489],[49.03901,104.14532],[49.03896,104.14557],[49.03782,104.14693],[49.03732,104.14725],[49.03398,104.14782],[49.03379,104.14764],[49.0332,104.14647],[49.03393,104.14559],[49.0343,104.14562],[49.03495,104.14458]]},
+  att_tzmmg: {name:"Авто тээврийн цех", lat:49.047014, lng:104.146778, km:2.07, route:[[49.04241,104.14032],[49.0391,104.14458],[49.03951,104.14525],[49.04011,104.14502],[49.04074,104.14556],[49.04235,104.14819],[49.043,104.14525],[49.04523,104.14204],[49.04594,104.14526],[49.0472,104.14503],[49.04748,104.14638],[49.04704,104.14674]]},
+  att_tbmmg: {name:"АТЦ: Төрөл бүрийн машин механизмын граш", lat:49.035053, lng:104.078476, km:6.94, route:[[49.04242,104.14035],[49.0391,104.14455],[49.03953,104.14528],[49.0401,104.14503],[49.04072,104.14552],[49.04236,104.14817],[49.04301,104.14524],[49.04713,104.13921],[49.0472,104.13866],[49.04598,104.1259],[49.04572,104.12106],[49.04597,104.12091],[49.0444,104.11199],[49.04417,104.11095],[49.04342,104.1089],[49.04027,104.1011],[49.03721,104.09337],[49.03407,104.08542],[49.03406,104.07748],[49.03543,104.07752],[49.03541,104.07833],[49.03508,104.0785]]},
+  dcs: {name:"Дулааны цахилгааны станц", lat:49.043891, lng:104.147797, km:1.42, route:[[49.0424,104.14035],[49.0391,104.14456],[49.03953,104.14526],[49.04011,104.14503],[49.04073,104.14554],[49.04236,104.14818],[49.04301,104.14526],[49.04313,104.14506],[49.04315,104.14555],[49.04328,104.14662],[49.04304,104.14678],[49.04315,104.14728],[49.0434,104.14718],[49.04347,104.14727]]},
+  cc: {name:"Цахилгаан цех", lat:49.049278, lng:104.134548, km:3.67, route:[[49.04241,104.14036],[49.0391,104.14456],[49.03954,104.14527],[49.04011,104.14504],[49.04073,104.14555],[49.04236,104.14818],[49.04301,104.14525],[49.04712,104.13921],[49.0472,104.13865],[49.04604,104.12654],[49.04792,104.12593],[49.04926,104.12946],[49.04947,104.13038],[49.04962,104.13135],[49.04987,104.13297],[49.04961,104.1342],[49.04943,104.13418],[49.04929,104.13454]]},
+};
+/* Байршил (GPS) оруулаагүй нэгжүүд: зай нь түр тоо, газрын зураг гарахгүй */
+Object.assign(DEPTS, {
+  edu: {name:"“Эрдэнэт цогцолбор” дээд сургууль", lat:49.031356, lng:104.062296, km:8.55, route:[[49.0424,104.1403],[49.04208,104.14069],[49.04194,104.14085],[49.04193,104.14086],[49.04177,104.14096],[49.04176,104.14096],[49.04165,104.14109],[49.04142,104.14158],[49.04116,104.14192],[49.04115,104.14194],[49.04031,104.14298],[49.04013,104.14321],[49.04003,104.14333],[49.03904,104.14454],[49.03932,104.14505],[49.03938,104.14512],[49.03946,104.14517],[49.03955,104.14517],[49.03996,104.14501],[49.04003,104.14498],[49.04011,104.14498],[49.04026,104.14512],[49.04062,104.14543],[49.04072,104.14556],[49.04079,104.14566],[49.0411,104.14615],[49.04147,104.14674],[49.04196,104.14751],[49.04208,104.14779],[49.04223,104.14802],[49.04228,104.14802],[49.04232,104.148],[49.04235,104.14798],[49.04238,104.14796],[49.0424,104.14792],[49.04241,104.14787],[49.04242,104.14784],[49.0428,104.14601],[49.04295,104.14527],[49.04334,104.14471],[49.04428,104.1433],[49.04517,104.14195],[49.04645,104.14007],[49.04701,104.13925],[49.04709,104.13901],[49.04715,104.13882],[49.04715,104.1388],[49.04707,104.13795],[49.047,104.13717],[49.047,104.13713],[49.04697,104.13686],[49.04692,104.13632],[49.0469,104.13605],[49.04687,104.13578],[49.04685,104.13551],[49.04683,104.1353],[49.04682,104.13524],[49.04681,104.1351],[49.0468,104.13503],[49.04679,104.13497],[49.04677,104.13476],[49.04677,104.1347],[49.04674,104.13443],[49.04671,104.13416],[49.0467,104.13402],[49.04669,104.13389],[49.04666,104.13362],[49.04664,104.1334],[49.04663,104.13335],[49.04661,104.13313],[49.04661,104.13308],[49.04659,104.13286],[49.04658,104.13281],[49.04657,104.13266],[49.04656,104.13254],[49.04653,104.13227],[49.0465,104.132],[49.04648,104.13177],[49.04648,104.13173],[49.04646,104.13158],[49.04645,104.1315],[49.04645,104.13146],[49.04643,104.13123],[49.04642,104.13119],[49.0464,104.13093],[49.04637,104.13066],[49.04634,104.13039],[49.04632,104.13012],[49.04629,104.12987],[49.04629,104.12985],[49.04627,104.12968],[49.04627,104.1296],[49.04626,104.12958],[49.04624,104.12933],[49.04624,104.12931],[49.04621,104.12904],[49.04618,104.12877],[49.04616,104.12851],[49.04616,104.1285],[49.04614,104.12832],[49.04613,104.12824],[49.04613,104.12823],[49.04611,104.12796],[49.04608,104.12769],[49.04605,104.12742],[49.04603,104.12715],[49.046,104.12688],[49.04597,104.12661],[49.04586,104.12588],[49.04589,104.12535],[49.04586,104.12471],[49.04577,104.12307],[49.04575,104.12262],[49.04573,104.12209],[49.04569,104.12152],[49.04566,104.12116],[49.04561,104.12034],[49.04557,104.11979],[49.04555,104.11963],[49.04554,104.11953],[49.04552,104.11944],[49.0455,104.11926],[49.04549,104.11919],[49.04547,104.11899],[49.04545,104.11885],[49.04544,104.11872],[49.0454,104.11846],[49.04537,104.11819],[49.04534,104.11795],[49.04525,104.11739],[49.04499,104.11574],[49.04496,104.11553],[49.04463,104.11339],[49.04458,104.11313],[49.0445,104.11259],[49.04446,104.11233],[49.04442,104.11206],[49.04437,104.11179],[49.04427,104.11131],[49.04423,104.11116],[49.04418,104.11098],[49.04407,104.11063],[49.04397,104.11032],[49.04393,104.11021],[49.04377,104.1098],[49.04364,104.10948],[49.04318,104.1083],[49.04285,104.10746],[49.04229,104.10594],[49.04198,104.10514],[49.04177,104.10462],[49.04167,104.10438],[49.04158,104.10415],[49.04154,104.10405],[49.04118,104.10315],[49.04111,104.10298],[49.04101,104.10275],[49.04055,104.10158],[49.04012,104.10062],[49.03913,104.09812],[49.03904,104.09789],[49.0381,104.09555],[49.03793,104.09512],[49.03761,104.09432],[49.03705,104.09292],[49.03693,104.0926],[49.03678,104.09222],[49.03657,104.0917],[49.03584,104.08993],[49.03578,104.08978],[49.03539,104.08876],[49.03514,104.08812],[49.03494,104.08763],[49.03484,104.0874],[49.03465,104.08693],[49.03409,104.08553],[49.03409,104.08544],[49.03408,104.08529],[49.03407,104.08495],[49.03409,104.0845],[49.03408,104.08342],[49.03406,104.0827],[49.03406,104.08133],[49.03406,104.08018],[49.03406,104.07955],[49.03404,104.07845],[49.03402,104.07746],[49.03462,104.07745],[49.03463,104.07814],[49.03462,104.07745],[49.03402,104.07746],[49.03325,104.07747],[49.033,104.07747],[49.03299,104.07712],[49.03299,104.07687],[49.03298,104.07603],[49.03298,104.07575],[49.03296,104.07438],[49.03295,104.07234],[49.03293,104.06891],[49.03292,104.06688],[49.03291,104.06565],[49.03291,104.06454],[49.03289,104.06361],[49.03286,104.06333],[49.03282,104.06298],[49.03277,104.06273],[49.03268,104.06233],[49.03245,104.06154],[49.03219,104.06065],[49.03202,104.06006],[49.03118,104.06061],[49.0314,104.06137],[49.03147,104.06162],[49.03154,104.06187],[49.03161,104.06212],[49.03161,104.06213],[49.03136,104.0623]]},
+  suv: {name:"Эрдэнэт сувилалын цогцолбор", km:3, noGeo:true},
+  sport: {name:"Спорт цогцолбор", lat:49.027746, lng:104.047257, km:10.77, route:[[49.0424,104.1403],[49.04208,104.14069],[49.04194,104.14085],[49.04193,104.14086],[49.04177,104.14096],[49.04176,104.14096],[49.04165,104.14109],[49.04142,104.14158],[49.04116,104.14192],[49.04115,104.14194],[49.04031,104.14298],[49.04013,104.14321],[49.04003,104.14333],[49.03904,104.14454],[49.03932,104.14505],[49.03938,104.14512],[49.03946,104.14517],[49.03955,104.14517],[49.03996,104.14501],[49.04003,104.14498],[49.04011,104.14498],[49.04026,104.14512],[49.04062,104.14543],[49.04072,104.14556],[49.04079,104.14566],[49.0411,104.14615],[49.04147,104.14674],[49.04196,104.14751],[49.04208,104.14779],[49.04223,104.14802],[49.04228,104.14802],[49.04232,104.148],[49.04235,104.14798],[49.04238,104.14796],[49.0424,104.14792],[49.04241,104.14787],[49.04242,104.14784],[49.0428,104.14601],[49.04295,104.14527],[49.04334,104.14471],[49.04428,104.1433],[49.04517,104.14195],[49.04645,104.14007],[49.04701,104.13925],[49.04709,104.13901],[49.04715,104.13882],[49.04715,104.1388],[49.04707,104.13795],[49.047,104.13717],[49.047,104.13713],[49.04697,104.13686],[49.04692,104.13632],[49.0469,104.13605],[49.04687,104.13578],[49.04685,104.13551],[49.04683,104.1353],[49.04682,104.13524],[49.04681,104.1351],[49.0468,104.13503],[49.04679,104.13497],[49.04677,104.13476],[49.04677,104.1347],[49.04674,104.13443],[49.04671,104.13416],[49.0467,104.13402],[49.04669,104.13389],[49.04666,104.13362],[49.04664,104.1334],[49.04663,104.13335],[49.04661,104.13313],[49.04661,104.13308],[49.04659,104.13286],[49.04658,104.13281],[49.04657,104.13266],[49.04656,104.13254],[49.04653,104.13227],[49.0465,104.132],[49.04648,104.13177],[49.04648,104.13173],[49.04646,104.13158],[49.04645,104.1315],[49.04645,104.13146],[49.04643,104.13123],[49.04642,104.13119],[49.0464,104.13093],[49.04637,104.13066],[49.04634,104.13039],[49.04632,104.13012],[49.04629,104.12987],[49.04629,104.12985],[49.04627,104.12968],[49.04627,104.1296],[49.04626,104.12958],[49.04624,104.12933],[49.04624,104.12931],[49.04621,104.12904],[49.04618,104.12877],[49.04616,104.12851],[49.04616,104.1285],[49.04614,104.12832],[49.04613,104.12824],[49.04613,104.12823],[49.04611,104.12796],[49.04608,104.12769],[49.04605,104.12742],[49.04603,104.12715],[49.046,104.12688],[49.04597,104.12661],[49.04586,104.12588],[49.04589,104.12535],[49.04586,104.12471],[49.04577,104.12307],[49.04575,104.12262],[49.04573,104.12209],[49.04569,104.12152],[49.04566,104.12116],[49.04561,104.12034],[49.04557,104.11979],[49.04555,104.11963],[49.04554,104.11953],[49.04552,104.11944],[49.0455,104.11926],[49.04549,104.11919],[49.04547,104.11899],[49.04545,104.11885],[49.04544,104.11872],[49.0454,104.11846],[49.04537,104.11819],[49.04534,104.11795],[49.04525,104.11739],[49.04499,104.11574],[49.04496,104.11553],[49.04463,104.11339],[49.04458,104.11313],[49.0445,104.11259],[49.04446,104.11233],[49.04442,104.11206],[49.04437,104.11179],[49.04427,104.11131],[49.04423,104.11116],[49.04418,104.11098],[49.04407,104.11063],[49.04397,104.11032],[49.04393,104.11021],[49.04377,104.1098],[49.04364,104.10948],[49.04318,104.1083],[49.04285,104.10746],[49.04229,104.10594],[49.04198,104.10514],[49.04177,104.10462],[49.04167,104.10438],[49.04158,104.10415],[49.04154,104.10405],[49.04118,104.10315],[49.04111,104.10298],[49.04101,104.10275],[49.04055,104.10158],[49.04012,104.10062],[49.03913,104.09812],[49.03904,104.09789],[49.0381,104.09555],[49.03793,104.09512],[49.03761,104.09432],[49.03705,104.09292],[49.03693,104.0926],[49.03678,104.09222],[49.03657,104.0917],[49.03584,104.08993],[49.03578,104.08978],[49.03539,104.08876],[49.03514,104.08812],[49.03494,104.08763],[49.03484,104.0874],[49.03465,104.08693],[49.03409,104.08553],[49.03409,104.08544],[49.03408,104.08529],[49.03407,104.08495],[49.03409,104.0845],[49.03408,104.08342],[49.03406,104.0827],[49.03406,104.08133],[49.03406,104.08018],[49.03406,104.07955],[49.03404,104.07845],[49.03402,104.07746],[49.03462,104.07745],[49.03463,104.07814],[49.03462,104.07745],[49.03402,104.07746],[49.03325,104.07747],[49.033,104.07747],[49.03299,104.07712],[49.03299,104.07687],[49.03298,104.07603],[49.03298,104.07575],[49.03296,104.07438],[49.03295,104.07234],[49.03293,104.06891],[49.03292,104.06688],[49.03291,104.06565],[49.03291,104.06454],[49.03289,104.06361],[49.03286,104.06333],[49.03282,104.06298],[49.03277,104.06273],[49.03268,104.06233],[49.03245,104.06154],[49.03219,104.06065],[49.03202,104.06006],[49.03118,104.06061],[49.0314,104.06137],[49.03147,104.06162],[49.03154,104.06187],[49.03161,104.06212],[49.03161,104.06213],[49.03161,104.06212],[49.03154,104.06187],[49.03147,104.06162],[49.0314,104.06137],[49.03118,104.06061],[49.03202,104.06006],[49.03157,104.0585],[49.03147,104.05817],[49.0311,104.05693],[49.0311,104.05692],[49.03102,104.05667],[49.03095,104.05642],[49.03088,104.05617],[49.03064,104.05536],[49.03049,104.05499],[49.03039,104.05477],[49.03031,104.0546],[49.03028,104.05451],[49.03018,104.05425],[49.0301,104.054],[49.02996,104.05352],[49.02993,104.05343],[49.02982,104.05305],[49.03,104.05291],[49.03016,104.05277],[49.03039,104.05257],[49.0304,104.05255],[49.03055,104.05243],[49.03061,104.05265],[49.03055,104.05243],[49.0304,104.05255],[49.03039,104.05257],[49.03016,104.05277],[49.03,104.05291],[49.02982,104.05305],[49.02947,104.05184],[49.02944,104.05176],[49.02923,104.051],[49.029,104.05018],[49.02895,104.05003],[49.02881,104.04953],[49.02866,104.04903],[49.02852,104.04855],[49.02833,104.04792],[49.02811,104.04717],[49.02784,104.04625],[49.02746,104.04499],[49.02762,104.04489],[49.02801,104.04463],[49.02842,104.04435],[49.0287,104.04529],[49.02872,104.04532],[49.02875,104.04532],[49.02872,104.04532],[49.0287,104.04529],[49.02842,104.04435],[49.02801,104.04463],[49.02762,104.04489],[49.02746,104.04499],[49.02784,104.04625],[49.02807,104.04703],[49.02775,104.04726]]},
+  soyol: {name:"Соёл урлагын цогцолбор", lat:49.028816, lng:104.046094, km:10.43, route:[[49.0424,104.1403],[49.04208,104.14069],[49.04194,104.14085],[49.04193,104.14086],[49.04177,104.14096],[49.04176,104.14096],[49.04165,104.14109],[49.04142,104.14158],[49.04116,104.14192],[49.04115,104.14194],[49.04031,104.14298],[49.04013,104.14321],[49.04003,104.14333],[49.03904,104.14454],[49.03932,104.14505],[49.03938,104.14512],[49.03946,104.14517],[49.03955,104.14517],[49.03996,104.14501],[49.04003,104.14498],[49.04011,104.14498],[49.04026,104.14512],[49.04062,104.14543],[49.04072,104.14556],[49.04079,104.14566],[49.0411,104.14615],[49.04147,104.14674],[49.04196,104.14751],[49.04208,104.14779],[49.04223,104.14802],[49.04228,104.14802],[49.04232,104.148],[49.04235,104.14798],[49.04238,104.14796],[49.0424,104.14792],[49.04241,104.14787],[49.04242,104.14784],[49.0428,104.14601],[49.04295,104.14527],[49.04334,104.14471],[49.04428,104.1433],[49.04517,104.14195],[49.04645,104.14007],[49.04701,104.13925],[49.04709,104.13901],[49.04715,104.13882],[49.04715,104.1388],[49.04707,104.13795],[49.047,104.13717],[49.047,104.13713],[49.04697,104.13686],[49.04692,104.13632],[49.0469,104.13605],[49.04687,104.13578],[49.04685,104.13551],[49.04683,104.1353],[49.04682,104.13524],[49.04681,104.1351],[49.0468,104.13503],[49.04679,104.13497],[49.04677,104.13476],[49.04677,104.1347],[49.04674,104.13443],[49.04671,104.13416],[49.0467,104.13402],[49.04669,104.13389],[49.04666,104.13362],[49.04664,104.1334],[49.04663,104.13335],[49.04661,104.13313],[49.04661,104.13308],[49.04659,104.13286],[49.04658,104.13281],[49.04657,104.13266],[49.04656,104.13254],[49.04653,104.13227],[49.0465,104.132],[49.04648,104.13177],[49.04648,104.13173],[49.04646,104.13158],[49.04645,104.1315],[49.04645,104.13146],[49.04643,104.13123],[49.04642,104.13119],[49.0464,104.13093],[49.04637,104.13066],[49.04634,104.13039],[49.04632,104.13012],[49.04629,104.12987],[49.04629,104.12985],[49.04627,104.12968],[49.04627,104.1296],[49.04626,104.12958],[49.04624,104.12933],[49.04624,104.12931],[49.04621,104.12904],[49.04618,104.12877],[49.04616,104.12851],[49.04616,104.1285],[49.04614,104.12832],[49.04613,104.12824],[49.04613,104.12823],[49.04611,104.12796],[49.04608,104.12769],[49.04605,104.12742],[49.04603,104.12715],[49.046,104.12688],[49.04597,104.12661],[49.04586,104.12588],[49.04589,104.12535],[49.04586,104.12471],[49.04577,104.12307],[49.04575,104.12262],[49.04573,104.12209],[49.04569,104.12152],[49.04566,104.12116],[49.04561,104.12034],[49.04557,104.11979],[49.04555,104.11963],[49.04554,104.11953],[49.04552,104.11944],[49.0455,104.11926],[49.04549,104.11919],[49.04547,104.11899],[49.04545,104.11885],[49.04544,104.11872],[49.0454,104.11846],[49.04537,104.11819],[49.04534,104.11795],[49.04525,104.11739],[49.04499,104.11574],[49.04496,104.11553],[49.04463,104.11339],[49.04458,104.11313],[49.0445,104.11259],[49.04446,104.11233],[49.04442,104.11206],[49.04437,104.11179],[49.04427,104.11131],[49.04423,104.11116],[49.04418,104.11098],[49.04407,104.11063],[49.04397,104.11032],[49.04393,104.11021],[49.04377,104.1098],[49.04364,104.10948],[49.04318,104.1083],[49.04285,104.10746],[49.04229,104.10594],[49.04198,104.10514],[49.04177,104.10462],[49.04167,104.10438],[49.04158,104.10415],[49.04154,104.10405],[49.04118,104.10315],[49.04111,104.10298],[49.04101,104.10275],[49.04055,104.10158],[49.04012,104.10062],[49.03913,104.09812],[49.03904,104.09789],[49.0381,104.09555],[49.03793,104.09512],[49.03761,104.09432],[49.03705,104.09292],[49.03693,104.0926],[49.03678,104.09222],[49.03657,104.0917],[49.03584,104.08993],[49.03578,104.08978],[49.03539,104.08876],[49.03514,104.08812],[49.03494,104.08763],[49.03484,104.0874],[49.03465,104.08693],[49.03409,104.08553],[49.03409,104.08544],[49.03408,104.08529],[49.03407,104.08495],[49.03409,104.0845],[49.03408,104.08342],[49.03406,104.0827],[49.03406,104.08133],[49.03406,104.08018],[49.03406,104.07955],[49.03404,104.07845],[49.03402,104.07746],[49.03462,104.07745],[49.03463,104.07814],[49.03462,104.07745],[49.03402,104.07746],[49.03325,104.07747],[49.033,104.07747],[49.03299,104.07712],[49.03299,104.07687],[49.03298,104.07603],[49.03298,104.07575],[49.03296,104.07438],[49.03295,104.07234],[49.03293,104.06891],[49.03292,104.06688],[49.03291,104.06565],[49.03291,104.06454],[49.03289,104.06361],[49.03286,104.06333],[49.03282,104.06298],[49.03277,104.06273],[49.03268,104.06233],[49.03245,104.06154],[49.03219,104.06065],[49.03202,104.06006],[49.03118,104.06061],[49.0314,104.06137],[49.03147,104.06162],[49.03154,104.06187],[49.03161,104.06212],[49.03161,104.06213],[49.03161,104.06212],[49.03154,104.06187],[49.03147,104.06162],[49.0314,104.06137],[49.03118,104.06061],[49.03202,104.06006],[49.03157,104.0585],[49.03147,104.05817],[49.0311,104.05693],[49.0311,104.05692],[49.03102,104.05667],[49.03095,104.05642],[49.03088,104.05617],[49.03064,104.05536],[49.03049,104.05499],[49.03039,104.05477],[49.03031,104.0546],[49.03028,104.05451],[49.03018,104.05425],[49.0301,104.054],[49.02996,104.05352],[49.02993,104.05343],[49.02982,104.05305],[49.03,104.05291],[49.03016,104.05277],[49.03039,104.05257],[49.0304,104.05255],[49.03055,104.05243],[49.03061,104.05265],[49.03055,104.05243],[49.0304,104.05255],[49.03039,104.05257],[49.03016,104.05277],[49.03,104.05291],[49.02982,104.05305],[49.02947,104.05184],[49.02944,104.05176],[49.02923,104.051],[49.029,104.05018],[49.02895,104.05003],[49.02881,104.04953],[49.02866,104.04903],[49.02852,104.04855],[49.02833,104.04792],[49.02811,104.04717],[49.02784,104.04625],[49.02746,104.04499],[49.02762,104.04489],[49.02801,104.04463],[49.02842,104.04435],[49.0287,104.04529],[49.02872,104.04532],[49.02875,104.04532],[49.02882,104.04609]]},
+  rus_sch: {name:"Орос сургууль", km:3, noGeo:true},
+  rus_hosp: {name:"Орос эмнэлэг", km:3, noGeo:true},
+  rus_kg: {name:"Орос цэцэрлэг", km:3, noGeo:true},
+  aauc: {name:"Аж ахуй үйлчилгээний цех", km:3, noGeo:true},
+  bu: {name:"Баяжуулах үйлдвэр", lat:49.03948, lng:104.14155, km:0.47, approx:true},
+  chh: {name:"Чанар хяналтын хэлтэс", lat:49.044692, lng:104.135667, km:0.6, approx:true},
+  hmtac: {name:"ХМТАЦ", km:3, noGeo:true},
+  iu: {name:"Ил уурхай", lat:49.028777, lng:104.140625, km:3.12, route:[[49.0424,104.1403],[49.04208,104.14069],[49.04194,104.14085],[49.04193,104.14086],[49.04177,104.14096],[49.04176,104.14096],[49.04165,104.14109],[49.04142,104.14158],[49.04116,104.14192],[49.04115,104.14194],[49.04031,104.14298],[49.04013,104.14321],[49.04003,104.14333],[49.03904,104.14454],[49.0388,104.14485],[49.03829,104.14414],[49.03782,104.14439],[49.03765,104.14448],[49.03748,104.14457],[49.03721,104.14471],[49.03707,104.14463],[49.03704,104.14461],[49.03705,104.1445],[49.03706,104.14437],[49.03755,104.14376],[49.03769,104.14359],[49.03804,104.14317],[49.03811,104.14307],[49.03826,104.1429],[49.03827,104.14288],[49.03817,104.14269],[49.03806,104.14248],[49.03801,104.14238],[49.03761,104.14162],[49.03739,104.14119],[49.03705,104.14055],[49.0367,104.13988],[49.03657,104.13974],[49.03706,104.139],[49.03725,104.13943],[49.03737,104.13929],[49.03725,104.13943],[49.03706,104.139],[49.03657,104.13974],[49.03643,104.13992],[49.03601,104.14044],[49.03573,104.14078],[49.03545,104.14113],[49.03531,104.1413],[49.0349,104.14182],[49.03476,104.142],[49.03425,104.14262],[49.03424,104.14219],[49.03423,104.14199],[49.03417,104.14154],[49.03407,104.14116],[49.03398,104.14089],[49.03395,104.14079],[49.03367,104.14021],[49.03341,104.14026],[49.03317,104.14023],[49.03245,104.14017],[49.03173,104.14012],[49.03137,104.1401],[49.03121,104.14009],[49.03103,104.13998],[49.03083,104.13986],[49.03075,104.13966],[49.03063,104.13935],[49.03066,104.1389],[49.03067,104.1387],[49.03068,104.13862],[49.03069,104.13843],[49.03096,104.13791],[49.03096,104.13767],[49.03096,104.13713],[49.03096,104.13707],[49.03085,104.13693],[49.03059,104.13662],[49.03056,104.13661],[49.0301,104.13655],[49.03003,104.13661],[49.02988,104.13676],[49.02943,104.1372],[49.02927,104.13734],[49.02821,104.13837],[49.02818,104.1384],[49.02807,104.13886],[49.02803,104.13907],[49.02806,104.13971],[49.02818,104.13986],[49.02878,104.14062]]},
+  gbc: {name:"Ган бөөрөнцгийн цех", km:3, noGeo:true},
+  zuc: {name:"Засвар угсралтын цех", lat:49.048814, lng:104.147529, km:2.45, route:[[49.04285,104.14074],[49.04242,104.1403],[49.03911,104.14458],[49.03953,104.14525],[49.04011,104.14505],[49.04072,104.14556],[49.04229,104.14811],[49.04298,104.14523],[49.04522,104.14206],[49.04654,104.14793],[49.04882,104.14675],[49.04918,104.14821],[49.04899,104.14837],[49.04881,104.14753]]},
+  tlt: {name:"Тээвэр ложистикийн төв", lat:49.04265, lng:104.140772, km:0.1, approx:true},
+  police: {name:"Гэрээт цагдаагийн хэсэг", km:3, noGeo:true},
+  oba: {name:"Онцгой байдлын алба", km:3, noGeo:true},
+  dc: {name:"Дотоодын цэрэг", km:3, noGeo:true},
+  shh: {name:"Судалгаа шинжилгээний хүрээлэн", km:3, noGeo:true},
+  selenge: {name:"“Сэлэнгэ” амралт аялал жуулчлалын цогцолбор", km:3, noGeo:true},
+  oyodol: {name:"Оёдлын цех", km:3, noGeo:true},
+  zth: {name:"Зураг төслийн хүрээлэн", km:3, noGeo:true},
+  bzc: {name:"Барилга засварын цех", lat:49.046275, lng:104.148944, km:0.97, approx:true},
+});
+Object.assign(DEPTS, {
+  zah1: {name:"Захиргааны I байр", lat:49.037367, lng:104.139288, km:1.37, route:[[49.0424,104.1403],[49.04208,104.14069],[49.04194,104.14085],[49.04193,104.14086],[49.04177,104.14096],[49.04176,104.14096],[49.04165,104.14109],[49.04142,104.14158],[49.04116,104.14192],[49.04115,104.14194],[49.04031,104.14298],[49.04013,104.14321],[49.04003,104.14333],[49.03904,104.14454],[49.0388,104.14485],[49.03829,104.14414],[49.03782,104.14439],[49.03765,104.14448],[49.03748,104.14457],[49.03721,104.14471],[49.03707,104.14463],[49.03704,104.14461],[49.03705,104.1445],[49.03706,104.14437],[49.03755,104.14376],[49.03769,104.14359],[49.03804,104.14317],[49.03811,104.14307],[49.03826,104.1429],[49.03827,104.14288],[49.03817,104.14269],[49.03806,104.14248],[49.03801,104.14238],[49.03761,104.14162],[49.03739,104.14119],[49.03705,104.14055],[49.0367,104.13988],[49.03657,104.13974],[49.03706,104.139],[49.03725,104.13943],[49.03737,104.13929]]},
+  zah2: {name:"Захиргааны II байр", lat:49.030995, lng:104.052926, km:9.47, route:[[49.0424,104.1403],[49.04208,104.14069],[49.04194,104.14085],[49.04193,104.14086],[49.04177,104.14096],[49.04176,104.14096],[49.04165,104.14109],[49.04142,104.14158],[49.04116,104.14192],[49.04115,104.14194],[49.04031,104.14298],[49.04013,104.14321],[49.04003,104.14333],[49.03904,104.14454],[49.03932,104.14505],[49.03938,104.14512],[49.03946,104.14517],[49.03955,104.14517],[49.03996,104.14501],[49.04003,104.14498],[49.04011,104.14498],[49.04026,104.14512],[49.04062,104.14543],[49.04072,104.14556],[49.04079,104.14566],[49.0411,104.14615],[49.04147,104.14674],[49.04196,104.14751],[49.04208,104.14779],[49.04223,104.14802],[49.04228,104.14802],[49.04232,104.148],[49.04235,104.14798],[49.04238,104.14796],[49.0424,104.14792],[49.04241,104.14787],[49.04242,104.14784],[49.0428,104.14601],[49.04295,104.14527],[49.04334,104.14471],[49.04428,104.1433],[49.04517,104.14195],[49.04645,104.14007],[49.04701,104.13925],[49.04709,104.13901],[49.04715,104.13882],[49.04715,104.1388],[49.04707,104.13795],[49.047,104.13717],[49.047,104.13713],[49.04697,104.13686],[49.04692,104.13632],[49.0469,104.13605],[49.04687,104.13578],[49.04685,104.13551],[49.04683,104.1353],[49.04682,104.13524],[49.04681,104.1351],[49.0468,104.13503],[49.04679,104.13497],[49.04677,104.13476],[49.04677,104.1347],[49.04674,104.13443],[49.04671,104.13416],[49.0467,104.13402],[49.04669,104.13389],[49.04666,104.13362],[49.04664,104.1334],[49.04663,104.13335],[49.04661,104.13313],[49.04661,104.13308],[49.04659,104.13286],[49.04658,104.13281],[49.04657,104.13266],[49.04656,104.13254],[49.04653,104.13227],[49.0465,104.132],[49.04648,104.13177],[49.04648,104.13173],[49.04646,104.13158],[49.04645,104.1315],[49.04645,104.13146],[49.04643,104.13123],[49.04642,104.13119],[49.0464,104.13093],[49.04637,104.13066],[49.04634,104.13039],[49.04632,104.13012],[49.04629,104.12987],[49.04629,104.12985],[49.04627,104.12968],[49.04627,104.1296],[49.04626,104.12958],[49.04624,104.12933],[49.04624,104.12931],[49.04621,104.12904],[49.04618,104.12877],[49.04616,104.12851],[49.04616,104.1285],[49.04614,104.12832],[49.04613,104.12824],[49.04613,104.12823],[49.04611,104.12796],[49.04608,104.12769],[49.04605,104.12742],[49.04603,104.12715],[49.046,104.12688],[49.04597,104.12661],[49.04586,104.12588],[49.04589,104.12535],[49.04586,104.12471],[49.04577,104.12307],[49.04575,104.12262],[49.04573,104.12209],[49.04569,104.12152],[49.04566,104.12116],[49.04561,104.12034],[49.04557,104.11979],[49.04555,104.11963],[49.04554,104.11953],[49.04552,104.11944],[49.0455,104.11926],[49.04549,104.11919],[49.04547,104.11899],[49.04545,104.11885],[49.04544,104.11872],[49.0454,104.11846],[49.04537,104.11819],[49.04534,104.11795],[49.04525,104.11739],[49.04499,104.11574],[49.04496,104.11553],[49.04463,104.11339],[49.04458,104.11313],[49.0445,104.11259],[49.04446,104.11233],[49.04442,104.11206],[49.04437,104.11179],[49.04427,104.11131],[49.04423,104.11116],[49.04418,104.11098],[49.04407,104.11063],[49.04397,104.11032],[49.04393,104.11021],[49.04377,104.1098],[49.04364,104.10948],[49.04318,104.1083],[49.04285,104.10746],[49.04229,104.10594],[49.04198,104.10514],[49.04177,104.10462],[49.04167,104.10438],[49.04158,104.10415],[49.04154,104.10405],[49.04118,104.10315],[49.04111,104.10298],[49.04101,104.10275],[49.04055,104.10158],[49.04012,104.10062],[49.03913,104.09812],[49.03904,104.09789],[49.0381,104.09555],[49.03793,104.09512],[49.03761,104.09432],[49.03705,104.09292],[49.03693,104.0926],[49.03678,104.09222],[49.03657,104.0917],[49.03584,104.08993],[49.03578,104.08978],[49.03539,104.08876],[49.03514,104.08812],[49.03494,104.08763],[49.03484,104.0874],[49.03465,104.08693],[49.03409,104.08553],[49.03409,104.08544],[49.03408,104.08529],[49.03407,104.08495],[49.03409,104.0845],[49.03408,104.08342],[49.03406,104.0827],[49.03406,104.08133],[49.03406,104.08018],[49.03406,104.07955],[49.03404,104.07845],[49.03402,104.07746],[49.03462,104.07745],[49.03463,104.07814],[49.03462,104.07745],[49.03402,104.07746],[49.03325,104.07747],[49.033,104.07747],[49.03299,104.07712],[49.03299,104.07687],[49.03298,104.07603],[49.03298,104.07575],[49.03296,104.07438],[49.03295,104.07234],[49.03293,104.06891],[49.03292,104.06688],[49.03291,104.06565],[49.03291,104.06454],[49.03289,104.06361],[49.03286,104.06333],[49.03282,104.06298],[49.03277,104.06273],[49.03268,104.06233],[49.03245,104.06154],[49.03219,104.06065],[49.03202,104.06006],[49.03118,104.06061],[49.0314,104.06137],[49.03147,104.06162],[49.03154,104.06187],[49.03161,104.06212],[49.03161,104.06213],[49.03161,104.06212],[49.03154,104.06187],[49.03147,104.06162],[49.0314,104.06137],[49.03118,104.06061],[49.03202,104.06006],[49.03157,104.0585],[49.03147,104.05817],[49.0311,104.05693],[49.0311,104.05692],[49.03102,104.05667],[49.03095,104.05642],[49.03088,104.05617],[49.03064,104.05536],[49.03049,104.05499],[49.03039,104.05477],[49.03031,104.0546],[49.03028,104.05451],[49.03018,104.05425],[49.0301,104.054],[49.02996,104.05352],[49.02993,104.05343],[49.02982,104.05305],[49.03,104.05291],[49.03016,104.05277],[49.03039,104.05257],[49.0304,104.05255],[49.03055,104.05243],[49.03061,104.05265],[49.031,104.05293]]},
+  zah3: {name:"Захиргааны III байр", lat:49.051208, lng:104.141666, km:1.29, approx:true},
+});
+const DEPT_ORDER = ["edu", "suv", "sport", "soyol", "rus_sch", "rus_hosp", "rus_kg", "aauc", "dcs", "bu", "chh", "uhc", "hmtac", "cc", "zmz_mech", "iu", "gbc", "zuc", "tlt", "att_tzmmg", "att_ttg", "att_tbmmg", "police", "oba", "dc", "shh", "selenge", "oyodol", "zth", "bzc", "zah1", "zah2", "zah3", "ghe"];
+/* Хуучин туршилтын захиалгууд эвдрэхгүйн тулд (сонголтод харагдахгүй) */
+Object.assign(DEPTS, {
+  ee:  {name:"Цахилгаан цех (хуучин жишээ)", km:1.8, hidden:true},
+  um:  {name:"УМ (хуучин жишээ)",            km:3.6, hidden:true},
+  att: {name:"Авто тээврийн цех (хуучин жишээ)", km:7.3, hidden:true},
+});
+const WH_GEO = {lat:49.042598, lng:104.140861};   // ТЛТ БМТС (Google Earth)
+const ROAD_FACTOR = 1.35;                           // цех хооронд шулуун зайг замын урт болгох ойролцоо коэффициент
+const deptList = () => DEPT_ORDER.map(k=>[k, DEPTS[k]]);
+function hav(a,b){ const R=6371, r=x=>x*Math.PI/180; const d=Math.sin(r(b.lat-a.lat)/2)**2+Math.cos(r(a.lat))*Math.cos(r(b.lat))*Math.sin(r(b.lng-a.lng)/2)**2; return 2*R*Math.asin(Math.sqrt(d)); }
+/* from=null бол БМТС-ээс (Google Earth-д зурсан замын бодит урт), бусад үед цех хоорондын ойролцоо зам */
+function legKm(from, to){
+  const T = DEPTS[to];
+  if (!from) return T.km;
+  const F = DEPTS[from];
+  if (F.lat && T.lat) return Math.round(hav(F,T)*ROAD_FACTOR*100)/100;
+  return Math.max(0.6, Math.abs(T.km - F.km));
+}
+/* Хамгийн ойрын цехээс эхэлж, дараа нь тухайн цехээс хамгийн ойрыг сонгоно */
+function orderStops(keys){
+  const left=[...keys], out=[]; let cur=null;
+  while(left.length){ left.sort((a,b)=>legKm(cur,a)-legKm(cur,b)); const n=left.shift(); out.push({dept:n, leg:legKm(cur,n)}); cur=n; }
+  return out;
+}
+function mapsUrl(from, to){
+  const T=DEPTS[to]; if(!T.lat) return "";
+  const F = from && DEPTS[from].lat ? DEPTS[from] : WH_GEO;
+  return `https://www.google.com/maps/dir/?api=1&origin=${F.lat},${F.lng}&destination=${T.lat},${T.lng}&travelmode=driving`;
+}
+const WAREHOUSE = "А-01 БМТС төв склад";
+const VEHICLE = {plate:"1234 ЭРА", model:"Kia Bongo III EV"};
+const RESERVE_VEHICLE = {plate:"5678 ЭРА", model:"БМТС-ийн нөөц машин (яаралтай)"};
+const RETURN_REASONS = ["Гэмтэлтэй","Буруу бараа ирсэн","Илүү ирсэн","Хаягдал / хуучин сэлбэг","Бусад"];
+const SCHEMA = 5;            // өгөгдлийн бүтцийн хувилбар: хуучин бүтэцтэй бичлэг харагдахгүй
+const INCOME_START = 1245;   // цаасан "Орлогын дугаар" журналын үргэлжлэл
+/* Бүртгэлийн үндсэн ангилал: накладан, хангамжийн мэргэжилтэн, орлогын дугаар энэ ангиллаар явна */
+const CATS = {
+  spare:"Сэлбэг хэрэгсэл", mat:"Үндсэн ба туслах материал", chem:"Химийн урвалж, реагент", fuel:"Шатах, тослох материал",
+  expl:"Тэсрэх бодис, тэсэлгээний хэрэгсэл", metal:"Металл ба металл хийц", elec:"Цахилгаан, автоматжуулалт, холбоо",
+  build:"Барилгын материал", ppe:"Хөдөлмөр хамгаалал, тусгай хувцас", office:"Аж ахуй, бичиг хэрэг",
+};
+const CATALOG = [
+  {cat:"spare", code:"8850135800000-3390", name:"Холхивч 6310-2RS",            uom:"ширхэг", price:36500},
+  {cat:"spare", code:"8850135800000-2231", name:"Дугуй 7.50R16",              uom:"ширхэг", price:420000},
+  {cat:"spare", code:"8850135800000-5128", name:"Гидравлик хоолой 1/2\"",     uom:"метр",   price:27000},
+  {cat:"mat",   code:"8850135800000-7010", name:"Ган бөмбөлөг 100мм",          uom:"тонн",   price:3150000},
+  {cat:"chem",  code:"8850135800000-7204", name:"Шохой",                       uom:"тонн",   price:285000},
+  {cat:"fuel",  code:"8850135800000-0412", name:"Моторын тос 15W-40, 20л",     uom:"сав",    price:186000},
+  {cat:"metal", code:"8850135800000-0907", name:"Гагнуурын электрод 3мм, 5кг", uom:"хайрцаг",price:58000},
+  {cat:"metal", code:"8850135800000-0955", name:"Ган лист 4мм",                uom:"ширхэг", price:310000},
+  {cat:"elec",  code:"8850135800000-6520", name:"Цахилгаан кабель ВВГ 3x2.5", uom:"метр",   price:12500},
+  {cat:"elec",  code:"8850135800000-1187", name:"Автомат таслуур 63А",        uom:"ширхэг", price:48000},
+  {cat:"build", code:"8850135800000-8102", name:"Цемент М400, 50кг",           uom:"уут",    price:21000},
+  {cat:"ppe",   code:"8850135800000-4471", name:"Ажлын бээлий",               uom:"хос",    price:4500},
+  {cat:"ppe",   code:"8850135800000-4480", name:"Хамгаалалтын малгай (каск)",  uom:"ширхэг", price:32000},
+  {cat:"ppe",   code:"8850135800000-4492", name:"Ажлын гутал",                 uom:"хос",    price:145000},
+  {cat:"office",code:"8850135800000-9001", name:"А4 цаас, 500 хуудас",         uom:"боодол", price:14500},
+  {cat:"office",code:"8850135800000-9017", name:"Угаалгын нунтаг 3кг",         uom:"уут",    price:18900},
+];
+const ROLES = {
+  nyarav:     {name:"Цехийн нярав",                     dept:true, d:"Захиалга өгнө, бараагаа хүлээн авна"},
+  head:       {name:"Цехийн дарга",                     dept:true, d:"Өөрийн цехийн захиалгад гарын үсэг зурна"},
+  supply:     {name:"Хангамжийн мэргэжилтэн",           cat:true,  d:"Өөрийн хариуцсан ангиллын накладанд зурна"},
+  senior:     {name:"Худалдан авах ажиллагааны тэргүүлэх мэргэжилтэн", d:"Хянаж зурна. Дараа нь орлогын дугаар автоматаар гарна"},
+  bmts_head:  {name:"БМТС-ийн дарга",                   d:"Олголтыг зөвшөөрч зурна"},
+  keeper:     {name:"БМТС-ийн нярав",                   d:"Хүлээн авч бэлтгэнэ, зарлагадаж зурна"},
+  gdisp:      {name:"Үйлдвэрийн ерөнхий диспетчер",     d:"Гарах бичигт зурна (08:00–17:00)"},
+  sdisp:      {name:"Ээлжийн диспетчер",                shift:true, d:"Жижүүрт байхдаа гарах бичигт зурна, тамга дарагдана"},
+  dispatcher: {name:"БМТС-ийн хүргэлтийн диспетчер",    d:"Хүргэлт төлөвлөнө, ачуулна"},
+  driver:     {name:"Жолооч",                           d:"Хүргэлт хийнэ, QR харуулна"},
+  guard:      {name:"II пост (харуул)",                 d:"Жолоочийн QR-ыг шалгаж гаргана"},
+  admin:      {name:"Системийн админ",                  d:"Бүх шатыг харж, үйлдэл хийнэ"},
+};
+/* 10 гарын үсэг (sig) + ажлын алхам (work) + автомат алхам. Өмнөх нь зурагдаж байж дараагийнх нээгдэнэ. */
+const STEPS = [
+  {k:"submit", sig:true, n:"Цехийн нярав (захиалга)",   d:"Захиалга илгээнэ", role:"nyarav", dept:true},
+  {k:"head",   sig:true, n:"Цехийн дарга",               d:"Хэрэгцээг баталгаажуулна", role:"head", dept:true, btn:"Гарын үсэг зурах"},
+  {k:"supply", sig:true, n:"Гэрээ хариуцсан хангамжийн мэргэжилтэн", d:"Гэрээ, тоо хэмжээг шалгаж накладанд зурна", role:"supply", cat:true, btn:"Гарын үсэг зурах", editQty:true},
+  {k:"senior", sig:true, n:"Худалдан авах ажиллагааны тэргүүлэх мэргэжилтэн", d:"Хянаж зөвшөөрнө", role:"senior", btn:"Гарын үсэг зурах"},
+  {k:"income", auto:true, n:"Орлогын дугаар",            d:"Ерөнхий журналаас дараалсан дугаар автоматаар олгогдоно"},
+  {k:"bmts",   sig:true, n:"БМТС-ийн дарга",             d:"Олголтыг зөвшөөрнө", role:"bmts_head", btn:"Гарын үсэг зурах"},
+  {k:"accept", work:true, n:"БМТС-ийн нярав захиалга хүлээн авна", d:"Төлөв “Бэлтгэгдэж байна” болно", role:"keeper", btn:"Захиалга хүлээн авах"},
+  {k:"issue",  sig:true, n:"БМТС-ийн нярав (зарлага)",   d:"Нярав, кранчин, ачаа зөөгч бэлтгэнэ. Нярав зарлагадаж зурна", role:"keeper", btn:"Зарлагадаж гарын үсэг зурах", issueQty:true},
+  {k:"gdisp",  sig:true, n:"Үйлдвэрийн ерөнхий диспетчер", d:"Гарах бичигт зурна (08:00–17:00)", role:"gdisp", btn:"Гарын үсэг зурах"},
+  {k:"sdisp",  sig:true, n:"Ээлжийн диспетчер",          d:"Гарах бичигт зурна, тамга автоматаар дарагдана", role:"sdisp", shift:true, btn:"Гарын үсэг зурж, тамга дарах"},
+  {k:"load",   work:true, n:"Жолооч тоолж хүлээн авч ачна", d:"Складаас машинд хариуцлага шилжинэ. Төлөв “Хүргэлтэнд гарсан” болно", role:"dispatcher", viaDelivery:true},
+  {k:"gate",   sig:true, n:"II пост",                    d:"Жолоочийн QR-ыг уншуулж гаргана", role:"guard", viaDelivery:true},
+  {k:"receive",sig:true, n:"Цехийн нярав (хүлээн авах)", d:"Тулгаж хүлээн аваад цехийн агуулахад оруулна", role:"nyarav", dept:true, viaDelivery:true},
+];
+const SIGS = STEPS.filter(x=>x.sig), SIG_TOTAL = SIGS.length;
+const sigNo = st => SIGS.indexOf(st) + 1;
+const sigDone = o => STEPS.slice(0, Math.min(o.step, STEPS.length)).filter(x=>x.sig).length;
+/* Ээлжийн диспетчер: 4 ээлж; 12 цаг ажиллаад 24 амарч, 12 цаг ажиллаад 48 амарна (өдөр 08–20, шөнө 20–08) */
+function dutyShift(t){
+  t = t || Date.now(); const d = new Date(t), h = d.getHours();
+  let day = Math.floor((t - d.getTimezoneOffset()*60000) / 864e5);
+  if (h>=8 && h<20) return day%4 + 1;
+  if (h<8) day--;
+  return (day+3)%4 + 1;
+}
+const dutyLabel = () => { const h = new Date().getHours(); return `${dutyShift()}-р ээлж (${h>=8&&h<20?"08:00–20:00":"20:00–08:00"})`; };
+const gdispOpen = () => { const h = new Date().getHours(); return h>=8 && h<17; };
+const SI = Object.fromEntries(STEPS.map((s,i)=>[s.k,i]));
+const BAR = [["Гарын үсэг зурагдаж буй",1,5],["БМТС-д ирсэн",6,6],["Бэлтгэгдэж байна",7,7],["Гарах бичиг",8,9],["Ачихад бэлэн",10,10],["Хүргэлтэнд гарсан",11,11],["Замд яваа",12,12],["Хүлээлгэн өгсөн",13,13]];
+const NOTIFY_KM = 1, SPEED = 20, SIM_STEP = 0.12; // үйлдвэр доторх хурд, км
+
+/* ===================== Туслах ===================== */
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const now = () => Date.now();
+const uid = () => (Date.now().toString(36) + Math.random().toString(36).slice(2,7)).toLowerCase();
+const token = (n=6) => Array.from({length:n},()=>"ABCDEFGHJKLMNPQRSTUVWXYZ23456789"[Math.floor(Math.random()*32)]).join("");
+const pin6 = () => String(Math.floor(100000 + Math.random()*900000));
+const p2 = n => String(n).padStart(2,"0");
+const fmtHM = t => { if(!t) return ""; const d=new Date(t); return p2(d.getHours())+":"+p2(d.getMinutes()); };
+const fmtT = t => { if(!t) return ""; const d=new Date(t); return p2(d.getMonth()+1)+"/"+p2(d.getDate())+" "+fmtHM(t); };
+const dur = ms => { if(ms==null||ms<0) return "—"; const m=Math.round(ms/60000); if(m<1) return "<1 мин"; if(m<60) return m+" мин"; const h=Math.floor(m/60); return h+" ц "+(m%60)+" мин"; };
+const money = v => Math.round(v).toLocaleString("en-US") + "₮";
+const qtyFmt = v => (Math.round(v*100)/100).toLocaleString("en-US");
+const initials = s => (s||"?").trim().split(/\s+/).map(w=>w[0]).join("").slice(0,2).toUpperCase();
+const lsGet = (k,d) => { try { const v = localStorage.getItem(k); return v==null ? d : JSON.parse(v); } catch { return d; } };
+const lsSet = (k,v) => { try { localStorage.setItem(k, JSON.stringify(v)); } catch {} };
+
+/* ===================== Өгөгдлийн сан: хуваалцсан (db) эсвэл энэ утсанд ===================== */
+const COLLS = ["orders","deliveries","notifications","returns"];
+const Store = {
+  mode:"loading", db:null, data:{orders:{},deliveries:{},notifications:{},returns:{}}, readOnly:false,
+  async init(){
+    let db = null;
+    /* Firebase (DTL-app). Бүх утас нэг өгөгдөл дээр ажиллана */
+    try {
+      const app = firebase.initializeApp({
+        apiKey: "AIzaSyBWsYanVW3UIMQEI-VjI05CfKVrSbXHQzU",
+        authDomain: "dtl-app-e5602.firebaseapp.com",
+        projectId: "dtl-app-e5602",
+        storageBucket: "dtl-app-e5602.firebasestorage.app",
+        messagingSenderId: "1009555985300",
+        appId: "1:1009555985300:web:c426709aef1e2b96f23581"
+      });
+      db = app.firestore();
+    } catch(e) { db = null; this.error = "init"; }
+    if (db) {
+      this.db = db; this.mode = "shared";
+      let first = 0;
+      const timer = setTimeout(()=>{ if(first<COLLS.length){ this.stale=true; render(); } }, 10000);
+      COLLS.forEach(c => db.collection(c).onSnapshot(snap => {
+        const map = {}; snap.docs.forEach(d => { if (d.exists) map[d.id] = d.data(); });
+        const before = this.data[c]; this.data[c] = map;
+        if (!snap.metadata.fromCache) { first++; if(first>=COLLS.length){ clearTimeout(timer); this.stale=false; } }
+        if (c==="notifications") Notif.onData(before, map);
+        render();
+      }, err => { this.error = err.code; render(); }));
+    } else {
+      this.mode = "local";
+      this.data = lsGet("bmts-demo-data", {orders:{},deliveries:{},notifications:{},returns:{}});
+      COLLS.forEach(c=>{ this.data[c] = this.data[c] || {}; });
+      Object.keys(this.data.notifications||{}).forEach(k=>Notif.shownAtLoad.add(k)); Notif.started = true;
+      window.addEventListener("storage", e => { if (e.key==="bmts-demo-data") { const b=this.data.notifications; this.data = lsGet("bmts-demo-data", this.data); COLLS.forEach(c=>{ this.data[c] = this.data[c] || {}; }); Notif.onData(b, this.data.notifications); render(); } });
+    }
+    render();
+  },
+  async put(c, id, obj){
+    const clean = JSON.parse(JSON.stringify(obj)); clean.v = SCHEMA;
+    if (this.mode==="shared") {
+      try { await this.db.collection(c).doc(id).set(clean); }
+      catch(e){ if (e && (e.code==="invalid_argument" || e.code==="permission-denied")) { this.readOnly=true; toast("Хадгалах эрхгүй","Мэдээллийн сангийн эрх хаагдсан байна. Firebase-ийн дүрмийг шалгана уу."); } else toast("Хадгалж чадсангүй", (e&&e.message)||"Дахин оролдоно уу."); throw e; }
+    } else {
+      const before = this.data.notifications;
+      this.data[c] = {...this.data[c], [id]: clean}; lsSet("bmts-demo-data", this.data);
+      if (c==="notifications") Notif.onData(before, this.data.notifications);
+      render();
+    }
+  },
+  async del(c, id){
+    if (this.mode==="shared") { try { await this.db.collection(c).doc(id).delete(); } catch {} }
+    else { const m = {...this.data[c]}; delete m[id]; this.data[c] = m; lsSet("bmts-demo-data", this.data); render(); }
+  },
+  list(c){ return Object.entries(this.data[c]).filter(([id,v])=>v && v.v===SCHEMA).map(([id,v])=>({...v, id})); },
+  get(c, id){ const v = this.data[c][id]; return v ? {...v, id} : null; },
+};
+
+/* ===================== Хэрэглэгч (энэ утсанд сонгосон дүр) ===================== */
+let ME = lsGet("bmts-me", null);           // {name, role, dept}
+const saveMe = m => { ME = m; lsSet("bmts-me", m); };
+const roleName = r => ROLES[r]?.name || r;
+const myScope = () => ME ? (ME.dept || ME.cat || (ME.shift ? "s"+ME.shift : null)) : null;
+const meLabel = () => ME ? `${ME.name} · ${roleName(ME.role)}${ME.dept ? " · "+DEPTS[ME.dept].name : ""}${ME.cat ? " · "+CATS[ME.cat] : ""}${ME.shift ? " · "+ME.shift+"-р ээлж" : ""}` : "";
+
+/* ===================== Мэдэгдэл ===================== */
+const Notif = {
+  seen: new Set(lsGet("bmts-seen", [])), started:false, shownAtLoad:new Set(),
+  forMe(n){
+    if (!ME) return false;
+    if (ME.role==="admin") return n.role!=="__none";
+    if (n.role!==ME.role) return false;
+    const sc = myScope(); if (n.dept && sc && n.dept!==sc) return false;
+    return true;
+  },
+  mine(){ return Store.list("notifications").filter(n=>this.forMe(n)).sort((a,b)=>b.at-a.at); },
+  unread(){ return this.mine().filter(n=>!this.seen.has(n.id)).length; },
+  markAll(){ this.mine().forEach(n=>this.seen.add(n.id)); lsSet("bmts-seen",[...this.seen].slice(-800)); render(); },
+  mark(id){ this.seen.add(id); lsSet("bmts-seen",[...this.seen].slice(-800)); },
+  onData(before, after){
+    if (!this.started) { this.started = true; Object.keys(after).forEach(k=>this.shownAtLoad.add(k)); return; }
+    const fresh = Object.entries(after).filter(([id])=>!before[id] && !this.shownAtLoad.has(id)).map(([id,v])=>({...v,id}));
+    fresh.filter(n=>this.forMe(n)).slice(-2).forEach(n => toast(n.title, n.body, n.link, n.id));
+  },
+};
+async function notify(role, title, body, link, dept){
+  const id = uid();
+  await Store.put("notifications", id, {role, dept: dept||null, title, body, link: link||"", at: now()});
+}
+let toastTimer;
+function toast(title, body, link, nid){
+  const slot = $("#toast-slot");
+  slot.innerHTML = `<div class="toast" role="status"><div class="tt">${esc(title)}</div><div class="tb">${esc(body||"")}</div></div>`;
+  const el = slot.firstElementChild;
+  el.onclick = () => { if (nid) Notif.mark(nid); slot.innerHTML=""; if (link) go(link); };
+  try { navigator.vibrate && navigator.vibrate([60,40,60]); } catch {}
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=>{ slot.innerHTML=""; }, 7000);
+}
+
+/* ===================== Захиалгын логик ===================== */
+const stepOf = o => STEPS[o.step] || null;
+function stateOf(o){
+  if (o.rejected) return ["Буцаагдсан","err"];
+  if (o.step>=STEPS.length) return ["Хүлээлгэн өгсөн","ok"];
+  if (o.step===0) return ["Ноорог",""];
+  for (const [l,a,b] of BAR) if (o.step>=a && o.step<=b) return [l, o.step>=11 ? "warn" : o.step>=6 ? "info" : "brand"];
+  return ["",""];
+}
+function canAct(o){
+  if (!ME || o.rejected || o.step>=STEPS.length) return false;
+  const s = stepOf(o); if (!s || s.auto) return false;
+  if (ME.role==="admin") return true;
+  if (s.k==="load") return ME.role==="dispatcher" || ME.role==="driver" || ME.role==="keeper";
+  if (s.role!==ME.role) return false;
+  if (s.dept && ME.dept!==o.dept) return false;
+  if (s.cat && ME.cat!==o.cat) return false;
+  if (s.shift && ME.shift!==dutyShift()) return false;
+  return true;
+}
+function waitingWho(o){
+  const s = stepOf(o); if (!s) return "";
+  const r = s.k==="load" ? "Диспетчер / жолооч" : roleName(s.role);
+  if (s.cat) return `${r} · ${CATS[o.cat]}`;
+  if (s.shift) return `${r} · ${dutyLabel()}`;
+  return s.dept ? `${r} (${DEPTS[o.dept].name})` : r;
+}
+function nextNo(prefix, field){
+  const used = Store.list("orders").map(o=>o[field]).filter(Boolean).map(v=>parseInt(String(v).split(/[\/-]/).pop(),10)||0);
+  return prefix + String((used.length ? Math.max(...used) : 0) + 1).padStart(5,"0");
+}
+function nextIncomeNo(){
+  const used = Store.list("orders").map(o=>parseInt(o.income_no,10)||0);
+  return String(Math.max(INCOME_START-1, ...used) + 1);
+}
+function nextDeliveryNo(){
+  const used = Store.list("deliveries").map(d=>parseInt(String(d.no).split("/").pop(),10)||0);
+  return "ХРГ/2026/" + String((used.length?Math.max(...used):0)+1).padStart(4,"0");
+}
+const amount = o => o.lines.reduce((s,l)=>s + (l.qa ?? l.qr) * l.price, 0);
+
+async function advance(o, comment, by){
+  o = JSON.parse(JSON.stringify(o));
+  const s = stepOf(o);
+  o.history.push({k:s.k, n: s.sig ? `Гарын үсэг ${sigNo(s)}/${SIG_TOTAL} · ${s.n}` : s.n, by: by || ME.name, role: ME.role, at: now(), c: comment||""});
+  o.step++;
+  // автомат алхам
+  while (o.step < STEPS.length && STEPS[o.step].auto) {
+    o.income_no = o.income_no || nextIncomeNo();
+    o.history.push({k:STEPS[o.step].k, n:STEPS[o.step].n, by:"Систем", role:"system", at: now(), c:"Олгосон: "+o.income_no});
+    o.step++;
+  }
+  o.updated = now();
+  await Store.put("orders", o.id, o);
+  await announce(o);
+  return o;
+}
+async function announce(o){
+  const link = "o-"+o.id;
+  if (o.step>=STEPS.length) {
+    await notify("keeper", "Хүлээлгэн өгсөн: "+o.no, `${DEPTS[o.dept].name} хүлээн авлаа${o.discrepancy?" (тоо зөрүүтэй)":""}.`, link);
+    return;
+  }
+  const s = STEPS[o.step], U = o.urgent ? "ЯАРАЛТАЙ · " : "";
+  if (s.k==="load") {
+    if (o.urgent) { await notify("dispatcher", U+"Нөөц машинаар гаргах: "+o.no, `${DEPTS[o.dept].name} · ${o.lines.length} мөр. Хуваарь хүлээхгүй, нөөц машинаар даруй хүргэнэ үү.`, "dl"); return; }
+    await notify("dispatcher", "Ачихад бэлэн: "+o.no, `${DEPTS[o.dept].name} · ${o.lines.length} мөр. Хүргэлт төлөвлөнө үү.`, "dl"); return;
+  }
+  if (s.k==="gate" || s.k==="receive") return;
+  const scope = s.dept ? o.dept : s.cat ? o.cat : s.shift ? "s"+dutyShift() : null;
+  const what = s.sig ? `Гарын үсэг ${sigNo(s)}/${SIG_TOTAL} таны ээлж` : "Таны ээлж";
+  await notify(s.role, U+what+": "+o.no, `${DEPTS[o.dept].name} · ${CATS[o.cat]} · ${o.lines.length} мөр · ${money(amount(o))}. Өмнөх гарын үсэг зурагдлаа, одоо та: ${s.d}.`, link, scope);
+  if (s.k==="bmts") await notify("nyarav", "Орлогын дугаар гарлаа: "+o.no, `Орлогын № ${o.income_no}. Одоо БМТС-ийн дарга зурна.`, link, o.dept);
+  if (s.k==="accept") await notify("nyarav", "БМТС-д очлоо: "+o.no, "Хангамж, БМТС-ийн даргын гарын үсэг зурагдлаа.", link, o.dept);
+  if (s.k==="issue") await notify("nyarav", "Бэлтгэгдэж байна: "+o.no, "БМТС-ийн нярав хүлээн авч, барааг бэлтгэж эхэллээ.", link, o.dept);
+}
+
+/* ===================== Чиглүүлэлт ===================== */
+const DIRTY = new Map();
+document.addEventListener("input", e => { const t = e.target; if (t && t.id && t.closest("#app") && t.type!=="radio" && t.type!=="checkbox") DIRTY.set(t.id, t.value); });
+let VIEW = "", TAB = lsGet("bmts-tab","lines"), FILTER = "active", CONFIRM = null, DRAFT = null, SIM = null;
+function go(h){ if (location.hash !== "#"+h) location.hash = h; else render(); }
+window.addEventListener("hashchange", ()=>{ CONFIRM=null; DIRTY.clear(); render(); window.scrollTo(0,0); });
+
+/* ===================== Дүрс ===================== */
+const ICONS = {
+  orders:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><rect x="5" y="3" width="14" height="18" rx="2"/><path d="M9 8h6M9 12h6M9 16h4"/></svg>`,
+  mine:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M4 13l5 5L20 7"/></svg>`,
+  wh:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"><path d="M3 9l9-5 9 5v11H3z"/><path d="M8 20v-6h8v6M8 14h8"/></svg>`,
+  dl:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"><path d="M2 7h11v9H2zM13 10h4l4 3v3h-8z"/><circle cx="6" cy="17.5" r="1.8" fill="#fff"/><circle cx="17" cy="17.5" r="1.8" fill="#fff"/></svg>`,
+  drv:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="2.2" fill="#fff"/><path d="M4 12h5.8M14.2 12H20M12 14.2V20"/></svg>`,
+  post:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4z"/><path d="M14 14h2v2h-2zM18 14h2M14 18v2M18 18h2v2"/></svg>`,
+  ret:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 010 10h-3"/></svg>`,
+  rep:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linecap="round"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>`,
+  ntf:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0112 0v5l2 2H4z"/><path d="M10 20a2 2 0 004 0"/></svg>`,
+  me:`<svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="1.8"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0116 0"/></svg>`,
+  grid:`<svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor"><rect x="3" y="3" width="5" height="5" rx="1"/><rect x="10" y="3" width="5" height="5" rx="1"/><rect x="17" y="3" width="5" height="5" rx="1"/><rect x="3" y="10" width="5" height="5" rx="1"/><rect x="10" y="10" width="5" height="5" rx="1"/><rect x="17" y="10" width="5" height="5" rx="1"/><rect x="3" y="17" width="5" height="5" rx="1"/><rect x="10" y="17" width="5" height="5" rx="1"/><rect x="17" y="17" width="5" height="5" rx="1"/></svg>`,
+  bell:`<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M6 16V11a6 6 0 0112 0v5l2 2H4z"/><path d="M10 20a2 2 0 004 0"/></svg>`,
+};
+const APPS = [
+  {k:"orders", n:"Захиалга",        c:"#00834A", roles:"*"},
+  {k:"mine",   n:"Миний ээлж",      c:"#E46E78", roles:"*"},
+  {k:"wh",     n:"БМТС склад",       c:"#21B799", roles:"keeper bmts_head admin"},
+  {k:"dl",     n:"Хүргэлт",          c:"#2F80ED", roles:"dispatcher keeper bmts_head admin"},
+  {k:"drv",    n:"Жолооч",           c:"#F2994A", roles:"driver dispatcher admin"},
+  {k:"post",   n:"Пост",             c:"#4F4F4F", roles:"guard admin"},
+  {k:"ret",    n:"Буцаалт",          c:"#B7791F", roles:"*"},
+  {k:"rep",    n:"Тайлан",           c:"#9B51E0", roles:"*"},
+  {k:"ntf",    n:"Мэдэгдэл",         c:"#EB5757", roles:"*"},
+  {k:"me",     n:"Миний тохиргоо",   c:"#5B7083", roles:"*"},
+];
+const appVisible = a => a.roles==="*" || (ME && (a.roles.split(" ").includes(ME.role)));
+
+/* ===================== Render ===================== */
+function nav(title){
+  const u = Notif.unread();
+  return `<header class="nav">
+    <button class="grid-btn" aria-label="Нүүр" onclick="go('home')">${ICONS.grid}</button>
+    <div class="app-name">${esc(title)}</div>
+    <button class="icon-btn" aria-label="Мэдэгдэл" onclick="go('ntf')">${ICONS.bell}${u?`<span class="badge-n">${u>99?"99+":u}</span>`:""}</button>
+    <button class="icon-btn" aria-label="Миний тохиргоо" onclick="go('me')"><span class="avatar">${esc(initials(ME?.name))}</span></button>
+  </header>`;
+}
+function myQueue(){ return Store.list("orders").filter(canAct).sort((a,b)=>(b.urgent-a.urgent)||(a.updated-b.updated)); }
+
+function render(){
+  const app = $("#app");
+  if (Store.mode==="loading") { app.innerHTML = `<div class="wrap"><div class="empty"><b>Ачаалж байна…</b>Өгөгдөлтэй холбогдож байна.</div></div>`; return; }
+  const h = decodeURIComponent(location.hash.slice(1));
+  if (!ME || h==="me" && !ME) { app.innerHTML = vLogin(); bindLogin(); drawQRs(); return; }
+  VIEW = h || "home";
+  let html;
+  if (VIEW==="home") html = vHome();
+  else if (VIEW==="orders") html = vOrders();
+  else if (VIEW==="new") html = vNew();
+  else if (VIEW.startsWith("o-")) html = vOrder(VIEW.slice(2));
+  else if (VIEW==="mine") html = vMine();
+  else if (VIEW==="wh") html = vWarehouse();
+  else if (VIEW==="dl") html = vDeliveries();
+  else if (VIEW.startsWith("d-")) html = vDelivery(VIEW.slice(2), false);
+  else if (VIEW==="drv") html = vDriver();
+  else if (VIEW==="post") html = vPost();
+  else if (VIEW.startsWith("gate-")) html = vGate(VIEW.slice(5));
+  else if (VIEW.startsWith("recv-")) html = vRecv(VIEW.slice(5));
+  else if (VIEW==="rep") html = vReport();
+  else if (VIEW==="ret") html = vReturns();
+  else if (VIEW==="ret-new" || VIEW.startsWith("ret-new-")) html = vRetNew(VIEW.slice(8) || null);
+  else if (VIEW.startsWith("r-")) html = vReturn(VIEW.slice(2));
+  else if (VIEW==="ntf") html = vNotifs();
+  else if (VIEW==="me") html = vMe();
+  else html = vHome();
+  const active = document.activeElement && document.activeElement.id;
+  app.innerHTML = html;
+  DIRTY.forEach((v,id)=>{ const el = document.getElementById(id); if (el && el.closest("#app")) el.value = v; });
+  if (active && document.getElementById(active) && /^(f-|q-|code-|rq-|rn-)/.test(active)) { const el=document.getElementById(active); el.focus(); try{ const v=el.value; el.value=""; el.value=v; }catch{} }
+  drawQRs();
+  document.title = "БМТС захиалга, хүргэлт";
+}
+function banner(){
+  if (Store.mode==="local") return `<div class="alert warn">Өгөгдөл зөвхөн энэ утсанд хадгалагдаж байна. Интернэт холболтоо шалгана уу.</div>`;
+  if (Store.stale) return `<div class="alert warn">Өгөгдлийн сантай холбогдож чадахгүй байна. Харагдаж буй мэдээлэл хуучирсан байж магадгүй.</div>`;
+  if (Store.readOnly) return `<div class="alert err">Мэдээллийн санд бичих эрх хаагдсан байна (Firebase-ийн туршилтын хугацаа дууссан байж магадгүй).</div>`;
+  return "";
+}
+
+/* ---------- Нэвтрэх: дүр сонгох ---------- */
+function vLogin(){
+  const r = ME?.role || "nyarav";
+  return `<header class="nav"><div class="app-name" style="padding-left:8px">БМТС захиалга, хүргэлт</div></header>
+  <div class="wrap"><div class="login">
+    <h1 class="title">Нэвтрэх</h1>
+    <p class="sub" style="font-size:14px">Нэр, албан тушаалаа сонгоно. Таны ээлж ирэхэд мэдэгдэл очно.</p>
+    <form id="login" class="form-grid">
+      <div class="inp"><label for="f-name">Таны нэр</label><input id="f-name" required placeholder="Жишээ: Б.Болд" value="${esc(ME?.name||"")}"></div>
+      <div class="inp"><label>Албан тушаал</label><div class="roles">
+        ${Object.entries(ROLES).map(([k,v])=>`<label><input type="radio" name="role" value="${k}" ${k===r?"checked":""}><span><b>${esc(v.name)}</b><div class="rd">${esc(v.d)}</div></span></label>`).join("")}
+      </div></div>
+      <div class="inp" id="dept-box"><label for="f-dept">Цех</label><select id="f-dept">${deptList().map(([k,d])=>`<option value="${k}" ${ME?.dept===k?"selected":""}>${esc(d.name)}</option>`).join("")}</select></div>
+      <div class="inp" id="cat-box"><label for="f-mycat">Хариуцсан ангилал</label><select id="f-mycat">${Object.entries(CATS).map(([k,n])=>`<option value="${k}" ${ME?.cat===k?"selected":""}>${esc(n)}</option>`).join("")}</select></div>
+      <div class="inp" id="shift-box"><label for="f-shift">Ээлж</label><select id="f-shift">${[1,2,3,4].map(i=>`<option value="${i}" ${(ME?.shift||dutyShift())===i?"selected":""}>${i}-р ээлж${i===dutyShift()?" (одоо жижүүрт)":""}</option>`).join("")}</select></div>
+      <button class="btn primary block" type="submit">Нэвтрэх</button>
+      <div class="mode">${Store.mode==="shared"?"Хуваалцсан горим: бүх гишүүн нэг өгөгдөл дээр ажиллана":"Өгөгдөл зөвхөн энэ утсанд хадгалагдана"}</div>
+    </form>
+    <div style="text-align:center;margin-top:18px"><p class="sub">Өөр утсанд нээх бол энэ QR-ыг камераар уншуулна</p><div class="qr"><div data-qr="${esc(baseUrl())}"></div></div></div>
+    </div></div>`;
+}
+function bindLogin(){
+  const f = $("#login"); if (!f) return;
+  const upd = () => { const r = f.querySelector("input[name=role]:checked")?.value; $("#dept-box").hidden = !(ROLES[r]?.dept); $("#cat-box").hidden = !(ROLES[r]?.cat); $("#shift-box").hidden = !(ROLES[r]?.shift); };
+  f.addEventListener("change", upd); upd();
+  f.addEventListener("submit", e => { e.preventDefault();
+    const role = f.querySelector("input[name=role]:checked").value;
+    const name = $("#f-name").value.trim() || roleName(role);
+    saveMe({name, role, dept: ROLES[role].dept ? $("#f-dept").value : null, cat: ROLES[role].cat ? $("#f-mycat").value : null, shift: ROLES[role].shift ? +$("#f-shift").value : null});
+    Notif.markAll(); go(location.hash.length>1 && location.hash!=="#me" ? location.hash.slice(1) : "home"); render();
+  });
+}
+
+/* ---------- Нүүр ---------- */
+function vHome(){
+  const q = myQueue().length, u = Notif.unread();
+  return `${nav("БМТС захиалга, хүргэлт")}<div class="home"><div class="wrap">
+    <div class="hello">${esc(meLabel())}</div>
+    ${banner()}
+    <div class="apps">${APPS.filter(appVisible).map(a=>{
+      const dot = a.k==="mine" ? q : a.k==="ntf" ? u : 0;
+      return `<button class="app" onclick="go('${a.k}')"><div class="ic" style="background:${a.c}">${ICONS[a.k]}</div><span>${esc(a.n)}</span>${dot?`<i class="dot">${dot}</i>`:""}</button>`;
+    }).join("")}</div>
+  </div></div>`;
+}
+
+/* ---------- Захиалгын жагсаалт ---------- */
+function orderRow(o){
+  const [l,c] = stateOf(o);
+  return `<div class="row" onclick="go('o-${o.id}')">
+    <div class="main"><div class="top"><span class="no">${esc(o.no)}</span>${o.urgent?`<span class="pill err">Яаралтай</span>`:""}</div>
+    <div class="meta">${esc(DEPTS[o.dept].name)} · ${esc(CATS[o.cat])} · ${money(amount(o))}</div>
+    <div class="meta">Гарын үсэг ${sigDone(o)}/${SIG_TOTAL}${o.step<STEPS.length&&!o.rejected?" · одоо: "+esc(waitingWho(o)):""}</div></div>
+    <span class="pill ${c}">${esc(l)}</span></div>`;
+}
+function vOrders(){
+  let list = Store.list("orders").sort((a,b)=>b.created-a.created);
+  if (FILTER==="active") list = list.filter(o=>o.step<STEPS.length && !o.rejected);
+  if (FILTER==="mydept" && ME.dept) list = list.filter(o=>o.dept===ME.dept);
+  if (FILTER==="done") list = list.filter(o=>o.step>=STEPS.length);
+  const canNew = ME.role==="nyarav" || ME.role==="admin";
+  return `${nav("Захиалга")}<div class="wrap">${banner()}
+    <div class="cp">${canNew?`<button class="btn primary" onclick="go('new')">Шинэ</button>`:""}<span class="sp"></span><span class="sub">${list.length} захиалга</span></div>
+    <div class="filters">${[["active","Идэвхтэй"],["all","Бүгд"],...(ME.dept?[["mydept","Миний цех"]]:[]),["done","Хүлээлгэн өгсөн"]].map(([k,n])=>`<button class="${FILTER===k?"on":""}" onclick="FILTER='${k}';render()">${n}</button>`).join("")}</div>
+    ${list.length ? `<div class="list">${list.map(orderRow).join("")}</div>` :
+      `<div class="empty"><b>Захиалга алга</b>${canNew?"“Шинэ” товчоор эхний захиалгаа үүсгэнэ үү.":"Цехийн нярав захиалга үүсгэхэд энд гарч ирнэ."}</div>`}
+  </div>`;
+}
+function vMine(){
+  const list = myQueue();
+  return `${nav("Миний ээлж")}<div class="wrap">${banner()}
+    <div class="crumb">${esc(meLabel())}</div>
+    ${["nyarav","admin"].includes(ME.role)?`<div class="sheet" style="margin-bottom:12px"><b>Жолооч ирсэн үү?</b>
+      <div class="sub" style="font-size:14px">Жолоочийн утсан дээрх QR-ыг камераар уншуулна, эсвэл доор кодыг нь бичнэ.</div>
+      <div class="line-add" style="grid-template-columns:1fr auto;margin-top:6px"><div class="inp"><input id="code-recv" maxlength="6" placeholder="Жишээ: DHL4B7" style="text-transform:uppercase" aria-label="Жолоочийн код"></div>
+      <button class="btn primary" onclick="const v=$('#code-recv').value.trim().toUpperCase(); if(v) go('recv-'+v)">Хүлээн авах</button></div></div>`:""}
+    ${list.length ? `<div class="list">${list.map(orderRow).join("")}</div>` :
+      `<div class="empty"><b>Танд хүлээгдэж буй захиалга алга</b>Ээлж ирэхэд дээр мэдэгдэл гарна.</div>`}
+  </div>`;
+}
+
+/* ---------- Шинэ захиалга ---------- */
+function vNew(){
+  if (!DRAFT) DRAFT = {dept: (ME.dept && !DEPTS[ME.dept]?.hidden) ? ME.dept : deptList()[0][0], purpose:"", contract:"", urgent:false, lines:[]};
+  const d = DRAFT;
+  return `${nav("Захиалга")}<div class="wrap">${banner()}
+    <div class="crumb"><a href="#orders">Захиалга</a> / Шинэ</div>
+    <div class="cp"><button class="btn primary" onclick="submitNew()" ${d.lines.length?"":"disabled"}>Илгээх</button><button class="btn" onclick="DRAFT=null;go('orders')">Болих</button></div>
+    <div class="statusbar">${BAR.map(([l],i)=>`<span>${l}</span>`).join("")}</div>
+    <div class="sheet"><h2>Шинэ захиалга</h2>
+      <div class="form-grid">
+        <div class="fields">
+          <div class="inp"><label for="f-dept2">Цех</label><select id="f-dept2" onchange="DRAFT.dept=this.value" ${ME.role!=="admin"?"disabled":""}>${deptList().map(([k,v])=>`<option value="${k}" ${d.dept===k?"selected":""}>${esc(v.name)}</option>`).join("")}</select></div>
+          <div class="inp"><label for="f-purpose">Зориулалт</label><input id="f-purpose" value="${esc(d.purpose)}" oninput="DRAFT.purpose=this.value" placeholder="Жишээ: Засварын ажил"></div>
+          <div class="inp"><label for="f-contract">Гэрээний дугаар</label><input id="f-contract" value="${esc(d.contract)}" oninput="DRAFT.contract=this.value" placeholder="5/135-26"></div>
+        </div>
+        <div class="inp"><label>Хүргэлтийн төрөл</label><div class="seg" role="radiogroup" aria-label="Хүргэлтийн төрөл">
+          <label><input type="radio" name="urg" ${!d.urgent?"checked":""} onchange="DRAFT.urgent=false;render()"><span><b>Хуваарьт</b><small>Хуваарьт өдөр бусад цехийн бараатай хамт хүргэнэ</small></span></label>
+          <label class="u"><input type="radio" name="urg" ${d.urgent?"checked":""} onchange="DRAFT.urgent=true;render()"><span><b>Яаралтай</b><small>Батлагчдад түрүүлж очно. БМТС-ийн нөөц машин даруй хүргэнэ</small></span></label>
+        </div></div>
+        ${d.urgent?`<div class="inp"><label for="f-urgr">Яаралтай болсон шалтгаан (заавал)</label><input id="f-urgr" value="${esc(d.urgent_reason||"")}" oninput="DRAFT.urgent_reason=this.value" placeholder="Жишээ: Экскаватор зогссон, сэлбэг хэрэгтэй"></div>`:""}
+      </div>
+      <div class="tabs"><button class="on">Бараа материал</button></div>
+      <div class="tabpane">
+        ${d.lines.length?`<div class="tbl-wrap"><table class="t"><tr><th>Бараа</th><th class="n">Тоо</th><th></th></tr>
+          ${d.lines.map((l,i)=>`<tr><td>${esc(l.name)}<div class="sub">${esc(CATS[l.cat])} · ${esc(l.code)} · ${money(l.price)}/${esc(l.uom)}</div></td><td class="n">${qtyFmt(l.qr)} ${esc(l.uom)}</td><td class="n"><button class="btn" aria-label="Устгах" onclick="DRAFT.lines.splice(${i},1);render()">✕</button></td></tr>`).join("")}
+        </table></div>
+        ${new Set(d.lines.map(l=>l.cat)).size>1?`<div class="alert info" style="margin-top:8px">Энэ захиалга ${new Set(d.lines.map(l=>l.cat)).size} ангиллын бараатай тул <b>${new Set(d.lines.map(l=>l.cat)).size} накладан</b> болж хуваагдана. Накладан бүр өөрийн хангамжийн мэргэжилтэн рүү очиж, тус тусдаа орлогын дугаар авна.</div>`:""}`:`<p class="sub">Бараа нэмнэ үү. Ангилал нь бараанаас автоматаар тодорхойлогдоно.</p>`}
+        <div class="line-add" style="margin-top:10px">
+          <div class="inp"><label for="f-prod">Бараа</label><select id="f-prod">${Object.entries(CATS).map(([ck,cn])=>{ const it=CATALOG.map((p,i)=>[p,i]).filter(([p])=>p.cat===ck); return it.length?`<optgroup label="${esc(cn)}">${it.map(([p,i])=>`<option value="${i}">${esc(p.name)} — ${p.code}</option>`).join("")}</optgroup>`:""; }).join("")}</select></div>
+          <div class="inp"><label for="f-qty">Тоо</label><input id="f-qty" type="number" min="0.01" step="any" inputmode="decimal" value="1"></div>
+          <button class="btn" onclick="addLine()">Нэмэх</button>
+        </div>
+      </div>
+    </div></div>`;
+}
+function addLine(){
+  const p = CATALOG[+$("#f-prod").value], q = parseFloat($("#f-qty").value);
+  if (!(q>0)) { toast("Тоо буруу","0-ээс их тоо оруулна уу."); return; }
+  DRAFT.lines.push({cat:p.cat, code:p.code, name:p.name, uom:p.uom, price:p.price, qr:q}); DIRTY.delete("f-qty"); render();
+}
+async function submitNew(){
+  const d = DRAFT; if (!d || !d.lines.length) return;
+  if (d.urgent && !(d.urgent_reason||"").trim()) { toast("Шалтгаан бичнэ үү","Яаралтай захиалгын шалтгааныг заавал бичнэ. Батлагчид үүнийг харж түрүүлж батална."); return; }
+  /* Ангилал бүр нэг накладан: тус бүр өөрийн мэргэжилтэн, орлогын дугаартай */
+  const cats = [...new Set(d.lines.map(l=>l.cat))], t = now(), grp = cats.length>1 ? uid() : null;
+  const used = Store.list("orders").map(o=>parseInt(String(o.no).split("/").pop(),10)||0);
+  const base = used.length ? Math.max(...used) : 0;
+  DRAFT = null;
+  const made = [];
+  for (let i=0;i<cats.length;i++){
+    const o = {id: uid(), no: "ШР/2026/"+String(base+1+i).padStart(5,"0"), grp, dept: d.dept, cat: cats[i], requester: ME.name, purpose: d.purpose, contract: d.contract,
+      urgent: !!d.urgent, urgent_reason: d.urgent ? d.urgent_reason.trim() : "",
+      lines: d.lines.filter(l=>l.cat===cats[i]).map(l=>({...l, qa:l.qr, qi:null, qx:null})), step:0, history:[], created:t+i, updated:t+i};
+    await advance(o, "Захиалга илгээв");
+    made.push(o);
+  }
+  if (made.length>1) { toast(made.length+" накладан үүслээ", made.map(o=>o.no+" · "+CATS[o.cat]).join("; ")); FILTER="active"; go("orders"); }
+  else go("o-"+made[0].id);
+}
+
+/* ---------- Захиалгын маягт ---------- */
+function vOrder(id){
+  const o = Store.get("orders", id);
+  if (!o) return `${nav("Захиалга")}<div class="wrap"><div class="empty"><b>Захиалга олдсонгүй</b><a href="#orders">Жагсаалт руу буцах</a></div></div>`;
+  const s = stepOf(o), act = canAct(o) && !Store.readOnly, [sl,sc] = stateOf(o);
+  const cur = o.rejected ? -1 : BAR.findIndex(([l,a,b])=>o.step>=a && o.step<=b);
+  const del = o.delivery ? Store.get("deliveries", o.delivery) : null;
+  let buttons = "";
+  if (act && s && !s.viaDelivery) {
+    buttons += `<button class="btn primary" onclick="doStep('${o.id}')">${esc(s.btn)}</button>`;
+    if (["head","supply","senior","bmts","accept","issue","gdisp","sdisp"].includes(s.k)) buttons += `<button class="btn" onclick="CONFIRM='reject';render()">Буцаах</button>`;
+  }
+  if (act && s && s.k==="receive") buttons += `<button class="btn primary" onclick="receiveForm('${o.id}')">Хүлээн авсан (маягтаар)</button>`;
+  if (o.step>=STEPS.length && (ME.role==="nyarav" && ME.dept===o.dept || ME.role==="admin") && !Store.readOnly) buttons += `<button class="btn" onclick="RDRAFT=null;go('ret-new-${o.id}')">Бараа буцаах</button>`;
+  if (o.rejected && (ME.role==="nyarav" && ME.dept===o.dept || ME.role==="admin")) buttons += `<button class="btn primary" onclick="resubmit('${o.id}')">Засаад дахин илгээх</button>`;
+  const editCol = act && s && (s.editQty || s.issueQty);
+  const sibs = o.grp ? Store.list("orders").filter(x=>x.grp===o.grp && x.id!==o.id) : [];
+  return `${nav("Захиалга")}<div class="wrap">${banner()}
+    <div class="crumb"><a href="#orders">Захиалга</a> / ${esc(o.no)}</div>
+    <div class="cp">${buttons}<span class="sp"></span></div>
+    ${CONFIRM==="reject"?`<div class="confirm"><div class="inp"><label for="f-reason">Буцаах шалтгаан</label><textarea id="f-reason" rows="2" placeholder="Жишээ: Тоо хэт их байна"></textarea></div><div class="cp" style="margin-top:8px"><button class="btn danger" onclick="doReject('${o.id}')">Буцаах</button><button class="btn" onclick="CONFIRM=null;render()">Болих</button></div></div>`:""}
+    <div class="statusbar">${BAR.map(([l],i)=>`<span class="${i===cur?"cur":i<cur||o.step>=STEPS.length?"done":""}">${l}</span>`).join("")}</div>
+    <div class="sheet">
+      ${o.urgent?`<div class="ribbon">ЯАРАЛТАЙ</div>`:o.step>=STEPS.length?`<div class="ribbon ok">ХҮРГЭГДСЭН</div>`:""}
+      <h2>${esc(o.no)}</h2>
+      ${o.rejected?`<div class="alert err"><b>Буцаагдсан:</b> ${esc(o.rejected.n)} — ${esc(o.rejected.by)}. Шалтгаан: ${esc(o.rejected.c)}</div>`:
+        o.step<STEPS.length?`<div class="alert ${act?"warn":"info"}"><b>${s.sig?`Гарын үсэг ${sigNo(s)}/${SIG_TOTAL}`:"Одоогийн алхам"}:</b> ${esc(s.n)} — ${act?"<b>таны ээлж</b>":"хүлээгдэж буй: "+esc(waitingWho(o))}${s.k==="gdisp"&&!gdispOpen()?"<br>Ерөнхий диспетчер 08:00–17:00 цагт ажиллана.":""}${s.k==="sdisp"&&ME.role==="sdisp"&&!act?`<br>Одоо жижүүрт ${esc(dutyLabel())} байна. Зөвхөн жижүүрт байгаа ээлж зурна.`:""}</div>`:
+        `<div class="alert ok"><b>Хүлээлгэн өгсөн.</b> ${o.handover==="qr"?"Нярав QR уншуулж баталгаажуулсан.":o.handover==="otp"?"Нярав SMS код өгч баталгаажуулсан.":"Маягтаар баталгаажуулсан."}${o.discrepancy?" Тоо зөрүүтэй.":""}</div>`}
+      <div class="fields">
+        <div class="f"><label>Цех</label><div>${esc(DEPTS[o.dept].name)}</div></div>
+        <div class="f"><label>Шаардсан</label><div>${esc(o.requester)}</div></div>
+        <div class="f"><label>Хүргэлтийн төрөл</label><div>${o.urgent?`<span class="pill err">Яаралтай</span> ${esc(o.urgent_reason||"")}`:"Хуваарьт"}</div></div>
+        <div class="f"><label>Ангилал (накладан)</label><div>${esc(CATS[o.cat])}</div></div>
+        ${sibs.length?`<div class="f"><label>Хамт илгээсэн накладан</label><div>${sibs.map(x=>`<a href="#o-${x.id}">${esc(x.no)}</a> · ${esc(CATS[x.cat])}`).join("<br>")}</div></div>`:""}
+        <div class="f"><label>Зориулалт</label><div>${esc(o.purpose||"—")}</div></div>
+        <div class="f"><label>Олгох склад</label><div>${esc(WAREHOUSE)}</div></div>
+        <div class="f"><label>Гэрээ</label><div>${esc(o.contract||"—")}</div></div>
+        <div class="f"><label>Орлогын №</label><div>${esc(o.income_no||"—")}</div></div>
+        <div class="f"><label>Гарах зөвшөөрөл</label><div>${o.gate_no?`${esc(o.gate_no)} <span class="stamp">ТАМГА ДАРАГДСАН</span>`:"—"}</div></div>
+        <div class="f"><label>Бүгд дүн</label><div><b>${money(amount(o))}</b></div></div>
+        <div class="f"><label>Хүргэлт</label><div>${del?`<a href="#d-${del.id}">${esc(del.no)}</a> · ${esc(del.vehicle.plate)}`:"—"}</div></div>
+      </div>
+      <div class="tabs">${[["lines","Бараа материал"],["hist","Батлалтын түүх"]].map(([k,n])=>`<button class="${TAB===k?"on":""}" onclick="TAB='${k}';lsSet('bmts-tab',TAB);render()">${n}</button>`).join("")}</div>
+      <div class="tabpane">${TAB==="hist"?histTable(o):linesTable(o, editCol ? (s.issueQty?"qi":"qa") : null)}</div>
+    </div>
+    ${actsBlock(o)}
+    ${ladder(o)}
+    <div class="chatter"><h3>Явцын тэмдэглэл</h3>
+      ${[...o.history].reverse().map(hh=>`<div class="msg"><span class="avatar">${esc(initials(hh.by))}</span><div><span class="who">${esc(hh.by)}</span><span class="when">${fmtT(hh.at)}</span><div class="body">✔ ${esc(hh.n)}${hh.c?` — ${esc(hh.c)}`:""}</div></div></div>`).join("")}
+    </div>
+  </div>`;
+}
+function linesTable(o, editField){
+  return `<div class="tbl-wrap"><table class="t"><tr><th>Бараа</th><th class="n">Хүссэн</th><th class="n">Зөвш.</th><th class="n">Зарлагадсан</th><th class="n">Жолооч авсан</th><th class="n">Хүлээн авсан</th><th class="n">Дүн</th></tr>
+    ${o.lines.map((l,i)=>`<tr><td>${esc(l.name)}<div class="sub">${esc(l.code)} · ${esc(l.uom)}</div></td>
+      <td class="n">${qtyFmt(l.qr)}</td>
+      <td class="n">${editField==="qa"?`<input id="q-${i}" type="number" step="any" min="0" value="${l.qa}" aria-label="Зөвшөөрсөн тоо">`:qtyFmt(l.qa)}</td>
+      <td class="n">${editField==="qi"?`<input id="q-${i}" type="number" step="any" min="0" value="${l.qi ?? l.qa}" aria-label="Зарлагадсан тоо">`:(l.qi==null?"—":qtyFmt(l.qi))}</td>
+      <td class="n">${l.qd==null?"—":`<span class="${l.qd!==(l.qi ?? l.qa)?"pill err":""}">${qtyFmt(l.qd)}</span>`}</td>
+      <td class="n">${l.qx==null?"—":`<span class="${l.qx!==(l.qd ?? l.qi)?"pill err":""}">${qtyFmt(l.qx)}</span>`}</td>
+      <td class="n">${money((l.qa ?? l.qr)*l.price)}</td></tr>`).join("")}
+  </table></div>${editField?`<p class="sub">Тоог засаж болно. Хадгалагдана гарын үсэг зурах товч дархад.</p>`:""}`;
+}
+/* Гарын үсгийн дараалал: зурагдсан, одоогийн, түгжээтэй */
+function ladder(o){
+  const done = sigDone(o), fin = o.step>=STEPS.length;
+  const last = k => { for (let i=o.history.length-1;i>=0;i--) if (o.history[i].k===k) return o.history[i]; return null; };
+  return `<div class="sheet" style="margin-top:12px"><h2 style="font-size:17px">Гарын үсгийн дараалал · ${done}/${SIG_TOTAL}</h2>
+    <div class="sigp"><i style="width:${Math.round(100*done/SIG_TOTAL)}%"></i></div>
+    <p class="sub" style="margin:0">Өмнөх гарын үсэг зурагдаж байж дараагийнх нээгдэнэ. Нээгдэх үед тухайн хүнд мэдэгдэл, мессеж очно.</p>
+    <ol class="lad">${STEPS.map((st,i)=>{
+      const isDone = i<o.step, isCur = i===o.step && !fin, rej = isCur && o.rejected, h = isDone ? last(st.k) : null;
+      const cls = (st.sig?"":"work ") + (isDone?"done":rej?"rej":isCur?"cur":"lock");
+      let sub;
+      if (isDone) sub = st.auto ? `Олгосон: № ${esc(o.income_no||"")}` : `Зурсан: ${esc(h?h.by:"")} · ${h?fmtT(h.at):""}${st.k==="sdisp"?` <span class="stamp">ТАМГА</span>`:""}`;
+      else if (rej) sub = `Буцаасан: ${esc(o.rejected.by)}. ${esc(o.rejected.c)}`;
+      else if (isCur) sub = st.auto ? "Автоматаар үүснэ" : `<b>Одоо ${st.sig?"зурах":"хийх"} ээлж:</b> ${esc(waitingWho(o))}`;
+      else sub = "Түгжээтэй: өмнөх алхам дууссаны дараа нээгдэнэ";
+      if (isDone && !st.sig && !st.auto) sub = `Хийсэн: ${esc(h?h.by:"")} · ${h?fmtT(h.at):""}`;
+      return `<li class="${cls}"><span class="n">${st.sig?sigNo(st):""}</span><div class="b"><div class="t">${esc(st.n)}</div><div class="d">${esc(st.d)}</div><div class="s">${sub}</div></div></li>`;
+    }).join("")}</ol></div>`;
+}
+function histTable(o){
+  const rows = []; let prev = o.created;
+  o.history.forEach(hh=>{ rows.push({...hh, wait: hh.at-prev}); prev = hh.at; });
+  const pending = o.step<STEPS.length && !o.rejected ? STEPS.slice(o.step) : [];
+  return `<div class="tbl-wrap"><table class="t"><tr><th>Шат</th><th>Баталсан</th><th>Огноо</th><th class="n">Хүлээсэн</th></tr>
+    ${rows.map(r=>`<tr><td>${esc(r.n)}${r.c?`<div class="sub">${esc(r.c)}</div>`:""}</td><td>${esc(r.by)}</td><td>${fmtT(r.at)}</td><td class="n">${r.role==="system"?"автомат":dur(r.wait)}</td></tr>`).join("")}
+    ${o.rejected?`<tr><td><span class="pill err">Буцаасан</span> ${esc(o.rejected.n)}<div class="sub">${esc(o.rejected.c)}</div></td><td>${esc(o.rejected.by)}</td><td>${fmtT(o.rejected.at)}</td><td class="n">${dur(o.rejected.at-prev)}</td></tr>`:""}
+    ${pending.map((s,i)=>`<tr><td style="color:var(--mute)">${esc(s.n)}</td><td>${i===0?`<span class="pill warn">Ээлж</span>`:`<span class="sub">хүлээгдэж буй</span>`}</td><td></td><td class="n">${i===0?dur(now()-prev):""}</td></tr>`).join("")}
+  </table></div>`;
+}
+async function doStep(id){
+  let o = Store.get("orders", id); if (!o || !canAct(o)) return;
+  const s = stepOf(o);
+  if (s.editQty || s.issueQty) {
+    const f = s.issueQty ? "qi" : "qa";
+    o.lines = o.lines.map((l,i)=>{ const el=$("#q-"+i); const v = el ? parseFloat(el.value) : NaN; return {...l, [f]: v>=0 ? v : (f==="qi" ? (l.qi ?? l.qa) : l.qa)}; });
+  }
+  let c = "";
+  if (s.k==="sdisp") { o.gate_no = nextNo("ГЗ/2026/","gate_no"); c = `Гарах зөвшөөрөл: ${o.gate_no} · ${dutyShift()}-р ээлж · тамга дарагдсан`; }
+  if (s.k==="issue") c = "Зарлагадсан: " + o.lines.map(l=>qtyFmt(l.qi)+" "+l.uom).join(", ");
+  DIRTY.clear();
+  await advance(o, c);
+  toast(s.sig?"Гарын үсэг зурагдлаа":"Хадгаллаа", s.sig ? `${sigNo(s)}/${SIG_TOTAL} · ${s.n}. Дараагийн хүнд мэдэгдэл очлоо.` : s.n);
+}
+async function doReject(id){
+  const o = Store.get("orders", id); if (!o) return;
+  const reason = ($("#f-reason")?.value||"").trim();
+  if (!reason) { toast("Шалтгаан бичнэ үү","Буцаах шалтгаанаа заавал бичнэ."); return; }
+  const s = stepOf(o);
+  o.rejected = {k:s.k, n:s.n, by:ME.name, c:reason, at:now()}; o.updated = now(); CONFIRM = null; DIRTY.clear();
+  await Store.put("orders", o.id, o);
+  await notify("nyarav", "Буцаагдсан: "+o.no, `${s.n}: ${reason}`, "o-"+o.id, o.dept);
+}
+async function resubmit(id){
+  const o = Store.get("orders", id); if (!o) return;
+  o.history.push({k:"reject", n:"Буцаагдсан: "+o.rejected.n, by:o.rejected.by, role:"x", at:o.rejected.at, c:o.rejected.c});
+  delete o.rejected; o.step = 0;
+  await advance(o, "Засаад дахин илгээв");
+}
+async function receiveForm(id){
+  const o = Store.get("orders", id); if (!o) return;
+  o.lines = o.lines.map(l=>({...l, qx: l.qd ?? l.qi ?? l.qa}));
+  await finishReceive([o], "form");
+}
+
+/* ---------- БМТС склад ---------- */
+function vWarehouse(){
+  const all = Store.list("orders").filter(o=>!o.rejected).sort((a,b)=>(b.urgent-a.urgent)||(a.updated-b.updated));
+  const rets = Store.list("returns").filter(r=>r.state!=="received").sort((a,b)=>a.created-b.created);
+  const inc = all.filter(o=>o.step===SI.accept), prep = all.filter(o=>o.step===SI.issue), ready = all.filter(o=>o.step===SI.gdisp||o.step===SI.sdisp||o.step===SI.load);
+  const sec = (t,l,e) => `<h3 style="margin:16px 0 8px;font-size:15px">${t} <span class="pill">${l.length}</span></h3>${l.length?`<div class="list">${l.map(orderRow).join("")}</div>`:`<div class="empty">${e}</div>`}`;
+  return `${nav("БМТС склад")}<div class="wrap">${banner()}
+    ${sec("Ирсэн захиалга (хүлээн авах)", inc, "БМТС-ийн дарга зурсан шинэ захиалга алга.")}
+    ${sec("Бэлтгэгдэж байна", prep, "Бэлтгэж буй захиалга алга.")}
+    ${sec("Ачихад бэлэн / гарах бичиг хүлээж буй", ready, "Алга.")}
+    <h3 style="margin:16px 0 8px;font-size:15px">Буцаж ирэх бараа <span class="pill">${rets.length}</span></h3>
+    ${rets.length?`<div class="list">${rets.map(retRow).join("")}</div>`:`<div class="empty">Цехүүдээс буцаах хүсэлт алга.</div>`}
+  </div>`;
+}
+
+/* ---------- Хүргэлт ---------- */
+function vDeliveries(){
+  const all = Store.list("orders").filter(o=>!o.rejected && o.step===SI.load && !o.delivery);
+  const urg = all.filter(o=>o.urgent), ready = all.filter(o=>!o.urgent);
+  const dls = Store.list("deliveries").sort((a,b)=>b.created-a.created);
+  const canPlan = ["dispatcher","admin","keeper"].includes(ME.role) && !Store.readOnly;
+  const rq = Store.list("returns").filter(r=>r.state==="requested");
+  return `${nav("Хүргэлт")}<div class="wrap">${banner()}
+    ${urg.length?`<div class="sheet" style="border:1.5px solid var(--err);margin-bottom:12px"><b style="color:var(--err)">Яаралтай: нөөц машинаар даруй гаргах (${urg.length})</b>
+      ${urg.map(o=>`<div class="row" style="margin-top:8px"><div class="main" onclick="go('o-${o.id}')"><div class="top"><span class="no">${esc(o.no)}</span><span class="pill err">Яаралтай</span></div><div class="meta">${esc(DEPTS[o.dept].name)} · ${esc(o.urgent_reason||"")}</div></div>${canPlan?`<button class="btn danger" onclick="urgentDelivery('${o.id}')">Даруй гаргах</button>`:""}</div>`).join("")}
+      <p class="sub" style="margin:8px 0 0">Хуваарьт хүргэлтийг хүлээхгүй. ${esc(RESERVE_VEHICLE.plate)} нөөц машин зөвхөн энэ цех рүү явна.</p></div>`:""}
+    <div class="cp">${canPlan?`<button class="btn primary" onclick="planDelivery()" ${ready.length?"":"disabled"}>Хүргэлт төлөвлөх (${ready.length})</button>`:""}<span class="sp"></span></div>
+    ${rq.length?`<div class="alert warn">Буцаах бараатай цех: ${[...new Set(rq.map(r=>DEPTS[r.dept].name))].map(esc).join(", ")}. Тэр цех рүү очих машин буцаахдаа ачиж авна.</div>`:""}
+    ${ready.length?`<div class="alert info">${ready.length} захиалга ачихад бэлэн: ${ready.map(o=>esc(o.no)+" ("+esc(DEPTS[o.dept].name)+")").join(", ")}. Хамгийн ойрын цехээс эхэлж, дараагийн ойрыг сонгон дараалуулна.</div>`:""}
+    ${dls.length?`<div class="list">${dls.map(d=>{const [l,c]=dState(d);return `<div class="row" onclick="go('d-${d.id}')"><div class="main"><div class="top"><span class="no">${esc(d.no)}</span>${d.kind==="urgent"?`<span class="pill err">Яаралтай</span>`:""}</div><div class="meta">${esc(d.vehicle.plate)} · ${d.stops.length} цех · ${d.stops.filter(s=>s.state==="delivered").length}/${d.stops.length} хүргэсэн</div></div><span class="pill ${c}">${l}</span></div>`;}).join("")}</div>`:
+      `<div class="empty"><b>Хүргэлт алга</b>ҮТХ гарах зөвшөөрөл олгосон захиалгууд энд “ачихад бэлэн” болж гарна.</div>`}
+  </div>`;
+}
+function dState(d){ return d.state==="planned"?["Төлөвлөсөн","brand"]:d.state==="out"?(d.gate_at?["Замд","warn"]:["Хүргэлтэнд гарсан","warn"]):["Дууссан","ok"]; }
+async function planDelivery(){
+  const ready = Store.list("orders").filter(o=>!o.rejected && o.step===SI.load && !o.delivery && !o.urgent);
+  if (!ready.length) return;
+  const id = uid();
+  const byDept = {}; ready.forEach(o=>{ (byDept[o.dept] = byDept[o.dept] || []).push(o.id); });
+  const stops = orderStops(Object.keys(byDept)).map(x=>({dept:x.dept, leg:x.leg, orders:byDept[x.dept], state:"pending"}));
+  const d = {no: nextDeliveryNo(), vehicle: VEHICLE, driver:"Жолооч", loaders:["Кранчин","Ачаа зөөгч"], stops, state:"planned", created: now(), gate_token:null, pos:0, cur:0};
+  await Store.put("deliveries", id, d);
+  for (const o of ready) await Store.put("orders", o.id, {...o, delivery:id, updated:now()});
+  await notify("driver", "Шинэ хүргэлт: "+d.no, `${stops.length} цех: ${stops.map(s=>DEPTS[s.dept].name).join(" → ")}`, "drv");
+  go("d-"+id);
+}
+/* Яаралтай: нөөц машин зөвхөн нэг цех рүү, хуваарь хүлээхгүй */
+async function urgentDelivery(oid){
+  const o0 = Store.get("orders", oid); if (!o0 || o0.delivery) return;
+  const os = Store.list("orders").filter(o=>!o.rejected && o.urgent && o.step===SI.load && !o.delivery && o.dept===o0.dept);
+  const id = uid();
+  const d = {no: nextDeliveryNo(), kind:"urgent", vehicle: RESERVE_VEHICLE, driver:"Нөөц жолооч", loaders:["Кранчин","Ачаа зөөгч"],
+    stops:[{dept:o0.dept, leg:DEPTS[o0.dept].km, orders:os.map(o=>o.id), state:"pending"}], state:"planned", created: now(), gate_token:null};
+  await Store.put("deliveries", id, d);
+  for (const o of os) await Store.put("orders", o.id, {...o, delivery:id, updated:now()});
+  await notify("driver", "ЯАРАЛТАЙ хүргэлт: "+d.no, `${RESERVE_VEHICLE.plate} нөөц машин · ${DEPTS[o0.dept].name} · ${os.map(o=>o.no).join(", ")}`, "drv");
+  await notify("nyarav", "Яаралтай хүргэлт гарч байна", `${os.map(o=>o.no).join(", ")} нөөц машинд ачигдаж байна.`, "o-"+oid, o0.dept);
+  go("d-"+id);
+}
+function vDelivery(id){
+  const d = Store.get("deliveries", id);
+  if (!d) return `${nav("Хүргэлт")}<div class="wrap"><div class="empty"><b>Хүргэлт олдсонгүй</b></div></div>`;
+  const [l,c] = dState(d);
+  const canLoad = d.state==="planned" && ["dispatcher","driver","keeper","admin"].includes(ME.role) && !Store.readOnly;
+  return `${nav("Хүргэлт")}<div class="wrap">${banner()}
+    <div class="crumb"><a href="#dl">Хүргэлт</a> / ${esc(d.no)}</div>
+    <div class="cp">${["driver","admin","dispatcher"].includes(ME.role)?`<button class="btn" onclick="go('drv')">Жолоочийн дэлгэц</button>`:""}<span class="sp"></span></div>
+    <div class="statusbar">${["Төлөвлөсөн","Хүргэлтэнд гарсан","Замд","Дууссан"].map((s,i)=>{const ci=d.state==="planned"?0:d.state==="done"?3:d.gate_at?2:1;return `<span class="${i===ci?"cur":i<ci?"done":""}">${s}</span>`}).join("")}</div>
+    <div class="sheet">${d.kind==="urgent"?`<div class="ribbon">ЯАРАЛТАЙ</div>`:""}<h2>${esc(d.no)}</h2>
+      <div class="fields">
+        <div class="f"><label>Машин</label><div>${esc(d.vehicle.plate)} · ${esc(d.vehicle.model)}</div></div>
+        <div class="f"><label>Жолооч</label><div>${esc(d.driver)}</div></div>
+        <div class="f"><label>Ачигчид</label><div>${esc(d.loaders.join(", "))}</div></div>
+        <div class="f"><label>Төлөв</label><div><span class="pill ${c}">${l}</span></div></div>
+        <div class="f"><label>Ачиж дууссан</label><div>${fmtT(d.loaded_at)||"—"}</div></div>
+        <div class="f"><label>Постоор гарсан</label><div>${d.gate_at?fmtT(d.gate_at)+" · "+esc(d.guard):"—"}</div></div>
+      </div>
+      <div class="tabs"><button class="on">Зогсоолууд (ойроос нь)</button></div>
+      ${routeMap(d)}
+      <div class="tabpane">${d.stops.map((s,i)=>stopCard(d,s,i,false)).join("")}</div>
+    </div>
+  </div>`;
+}
+function legOf(d,i){ const s=d.stops[i]; return s.leg ?? legKm(i?d.stops[i-1].dept:null, s.dept); }
+/* Хүргэлтийн газрын зураг: Google Earth-д зурсан замууд */
+function routeMap(d){
+  const ks=d.stops.map(s=>s.dept).filter(k=>DEPTS[k].lat); if(!ks.length) return "";
+  const P=[WH_GEO, ...ks.flatMap(k=>[DEPTS[k], ...(DEPTS[k].route||[]).map(([lat,lng])=>({lat,lng}))])];
+  const W=340,H=220,pad=18, kx=Math.cos(49.04*Math.PI/180);
+  const xs=P.map(p=>p.lng*kx), ys=P.map(p=>p.lat), x0=Math.min(...xs), x1=Math.max(...xs), y0=Math.min(...ys), y1=Math.max(...ys);
+  const sc=Math.min((W-2*pad)/((x1-x0)||1e-4),(H-2*pad)/((y1-y0)||1e-4));
+  const X=p=>(pad+(p.lng*kx-x0)*sc).toFixed(1), Y=p=>(H-pad-(p.lat-y0)*sc).toFixed(1);
+  const firstOpen=d.stops.findIndex(x=>x.state!=="delivered");
+  const lines=d.stops.map((s,i)=>{const r=DEPTS[s.dept].route; if(!r) return ""; const cls=s.state==="delivered"?"done":i===firstOpen?"cur":"";
+    return `<polyline class="${cls}" points="${r.map(([lat,lng])=>X({lat,lng})+","+Y({lat,lng})).join(" ")}"/>`;}).join("");
+  const dots=d.stops.map((s,i)=>{const p=DEPTS[s.dept]; if(!p.lat) return ""; return `<g><circle cx="${X(p)}" cy="${Y(p)}" r="9" class="${s.state==="delivered"?"done":""}"/><text x="${X(p)}" y="${Y(p)}" dy="3.5">${i+1}</text><text class="lb" x="${X(p)}" y="${Y(p)}" dy="-13">${esc(p.name)}</text></g>`;}).join("");
+  return `<figure class="rmap"><svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Хүргэлтийн маршрут">${lines}<g><rect x="${+X(WH_GEO)-8}" y="${+Y(WH_GEO)-8}" width="16" height="16" rx="3"/><text class="lb" x="${X(WH_GEO)}" y="${Y(WH_GEO)}" dy="20">БМТС</text></g>${dots}</svg>
+    <figcaption>Шар зам: одоо явах · саарал: хүргэсэн. Замууд Google Earth-д зурсан бодит чиглэлээр.</figcaption></figure>`;
+}
+function stopOrders(s){ return s.orders.map(id=>Store.get("orders", id)).filter(Boolean); }
+function stopState(s){ return {pending:["Хүлээгдэж буй",""],notified:["Няравт мэдэгдсэн","warn"],arrived:["Жолооч ирсэн","warn"],delivered:["Хүлээлгэн өгсөн","ok"]}[s.state]; }
+function stopCard(d, s, i, driver){
+  const [l,c] = stopState(s);
+  const os = stopOrders(s);
+  return `<div class="stop"><div class="hd"><span class="seq">${i+1}</span><div class="nm">${esc(DEPTS[s.dept].name)}</div><span class="pill ${c}">${l}</span></div>
+    <div class="sub" style="margin-top:4px">${DEPTS[s.dept].noGeo?"Байршил оруулаагүй: зай, газрын зураг тодорхойгүй":i===0?`БМТС-ээс ${DEPTS[s.dept].approx?"ойролцоогоор":"замаар"} ${DEPTS[s.dept].km} км`:`Өмнөх цехээс ~${legOf(d,i).toFixed(1)} км · БМТС-ээс ${DEPTS[s.dept].km} км`}</div>
+    ${mapsUrl(i?d.stops[i-1].dept:null, s.dept)?`<a class="btn" style="display:inline-block;margin-top:8px;text-decoration:none" target="_blank" rel="noopener" href="${mapsUrl(i?d.stops[i-1].dept:null, s.dept)}">Google Maps-д чиглэл нээх</a>`:""}
+    ${os.map(o=>`<div style="margin-top:8px"><a href="#o-${o.id}"><b>${esc(o.no)}</b></a> <span class="sub">${esc(o.requester)}</span>
+      <div class="sub">${o.lines.map(l=>esc(l.name)+" — "+qtyFmt(l.qi ?? l.qa)+" "+esc(l.uom)).join("; ")}</div></div>`).join("")}
+    ${s.state==="delivered"?`<div class="alert ok" style="margin:10px 0 0">✔ ${fmtHM(s.delivered_at)} · ${esc(s.received_by)} · ${s.method==="qr"?"QR уншуулсан":s.method==="otp"?"SMS код":"маягт"}</div>`:""}
+    ${stopReturns(d,s,driver)}
+    ${driver?driverStopActions(d,s,i):""}
+  </div>`;
+}
+/* Зөрүүний акт: зарлагадсан, жолооч авсан, цех хүлээн авсан тоо зөрөхөд автоматаар үүснэ */
+function makeAct(o, stage, lines, by){
+  const n = Store.list("orders").reduce((a,x)=>a+(x.acts?x.acts.length:0),0) + (o.acts?0:0) + 1 + (makeAct.extra||0); makeAct.extra = (makeAct.extra||0)+1;
+  const act = {no:"ЗА/2026/"+String(n).padStart(4,"0"), stage, at: now(), by,
+    from: stage==="load" ? "БМТС-ийн нярав" : "Жолооч", to: stage==="load" ? "Жолооч" : "Цехийн нярав ("+DEPTS[o.dept].name+")",
+    lines: lines.map(l=>({name:l.name, code:l.code, uom:l.uom, exp:l.exp, got:l.got}))};
+  o.acts = [...(o.acts||[]), act];
+  return act;
+}
+async function announceAct(o, act){
+  const txt = `${o.no} · ${act.from} → ${act.to}: ${act.lines.map(l=>l.name+" "+qtyFmt(l.exp)+"→"+qtyFmt(l.got)+" "+l.uom).join(", ")}`;
+  await notify("keeper", "Зөрүүний акт үүслээ: "+act.no, txt, "o-"+o.id);
+  await notify("bmts_head", "Зөрүүний акт үүслээ: "+act.no, txt, "o-"+o.id);
+  await notify("nyarav", "Зөрүүний акт үүслээ: "+act.no, txt, "o-"+o.id, o.dept);
+}
+function actsBlock(o){
+  if (!o.acts || !o.acts.length) return "";
+  return `<div class="sheet" style="margin-top:12px;border:1.5px solid var(--err)"><h2 style="font-size:17px;color:var(--err)">Зөрүүний акт</h2>
+    ${o.acts.map(a=>`<div style="margin-top:8px"><b>${esc(a.no)}</b> <span class="sub">${fmtT(a.at)}</span>
+      <div class="fields"><div class="f"><label>Хүлээлгэн өгсөн</label><div>${esc(a.from)}</div></div><div class="f"><label>Хүлээн авсан</label><div>${esc(a.to)} · ${esc(a.by)}</div></div>
+      <div class="f"><label>Үе шат</label><div>${a.stage==="load"?"Складаас машинд ачих үед":"Машинаас цехэд хүлээлгэн өгөх үед"}</div></div></div>
+      <div class="tbl-wrap"><table class="t"><tr><th>Бараа</th><th class="n">Өгсөн</th><th class="n">Авсан</th><th class="n">Зөрүү</th></tr>
+      ${a.lines.map(l=>`<tr><td>${esc(l.name)}<div class="sub">${esc(l.code||"")}</div></td><td class="n">${qtyFmt(l.exp)} ${esc(l.uom)}</td><td class="n">${qtyFmt(l.got)}</td><td class="n"><span class="pill err">${qtyFmt(Math.round((l.got-l.exp)*1000)/1000)}</span></td></tr>`).join("")}
+      </table></div></div>`).join("")}
+    <p class="sub" style="margin-top:8px">Акт автоматаар үүссэн. БМТС-ийн дарга, БМТС-ийн нярав, цехийн няравт мэдэгдэл очсон.</p></div>`;
+}
+/* Жолооч барааг тоолж хүлээн авна: складаас машинд шилжих хариуцлага */
+function loadForm(d){
+  if (!["driver","admin"].includes(ME.role) || Store.readOnly) return `<div class="alert info" style="margin-top:12px">Ачилт хийгдэж байна. Жолооч барааг тоолж хүлээн авсны дараа постын QR гарна.</div>`;
+  return `<div class="alert info" style="margin-top:12px"><b>Барааг тоолж хүлээн авна уу.</b> БМТС-ийн няравын зарлагадсан тоотой тулгана. Зөрвөл бодит тоог бичнэ: зөрүүний акт автоматаар үүснэ.</div>
+    ${d.stops.map(st=>stopOrders(st).filter(o=>o.step===SI.load).map(o=>`<div style="margin-top:10px"><b>${esc(o.no)}</b> <span class="sub">${esc(DEPTS[o.dept].name)}</span><div class="tbl-wrap"><table class="t"><tr><th>Бараа</th><th class="n">Зарлагадсан</th><th class="n">Ачсан</th></tr>
+      ${o.lines.map((l,li)=>`<tr><td>${esc(l.name)}<div class="sub">${esc(l.code)}</div></td><td class="n">${qtyFmt(l.qi ?? l.qa)} ${esc(l.uom)}</td><td class="n"><input id="q-ld-${o.id}-${li}" type="number" step="any" min="0" value="${l.qi ?? l.qa}" aria-label="Ачсан тоо"></td></tr>`).join("")}
+    </table></div></div>`).join("")).join("")}
+    <button class="btn primary block" style="margin-top:12px" onclick="loaded('${d.id}')">Тоолж хүлээн авлаа, ачиж дууслаа</button>`;
+}
+async function loaded(id){
+  const d = Store.get("deliveries", id); if (!d || d.state!=="planned") return;
+  makeAct.extra = 0;
+  for (const st of d.stops) for (const oid of st.orders) {
+    const o = Store.get("orders", oid); if (!o || o.step!==SI.load) continue;
+    o.lines = o.lines.map((l,li)=>{ const v = parseFloat($(`#q-ld-${o.id}-${li}`)?.value); return {...l, qd: v>=0 ? v : (l.qi ?? l.qa)}; });
+    const diff = o.lines.filter(l=>l.qd !== (l.qi ?? l.qa)).map(l=>({...l, exp:(l.qi ?? l.qa), got:l.qd}));
+    const act = diff.length ? makeAct(o, "load", diff, ME.name) : null;
+    await advance(o, `Жолооч тоолж хүлээн авав (${d.vehicle.plate})` + (act?` · зөрүүний акт ${act.no}`:""));
+    if (act) await announceAct(o, act);
+  }
+  DIRTY.clear();
+  const nd = {...d, state:"out", loaded_at: now(), gate_token: token(6)};
+  await Store.put("deliveries", id, nd);
+  await notify("driver", "Ачиж дууслаа: "+d.no, "Постын QR-аа харуулд уншуулна уу.", "drv");
+  await notify("guard", "Машин гарахаар ирж байна", `${d.vehicle.plate} · ${d.stops.length} цехийн бараа`, "post");
+  for (const st of d.stops) await notify("nyarav", "Бараа хүргэлтэнд гарлаа", `${d.vehicle.plate} машинд ачигдлаа. Ойртоход мэдэгдэнэ.`, "o-"+st.orders[0], st.dept);
+}
+
+/* ---------- Жолооч ---------- */
+let DRV_SEL = null;
+function activeDeliveries(){ return Store.list("deliveries").filter(d=>d.state!=="done").sort((a,b)=>((b.kind==="urgent")-(a.kind==="urgent"))||(a.created-b.created)); }
+function myDelivery(){ const ds = activeDeliveries(); return ds.find(d=>d.id===DRV_SEL) || ds[0] || null; }
+function vDriver(){
+  const d = myDelivery();
+  if (!d) return `${nav("Жолооч")}<div class="wrap">${banner()}<div class="empty"><b>Идэвхтэй хүргэлт алга</b>Диспетчер хүргэлт төлөвлөхөд энд гарч ирнэ.</div></div>`;
+  const qrUrl = baseUrl() + "#gate-" + d.gate_token;
+  const ds = activeDeliveries();
+  return `${nav("Жолооч")}<div class="wrap">${banner()}
+    ${ds.length>1?`<div class="filters">${ds.map(x=>`<button class="${x.id===d.id?"on":""}" onclick="DRV_SEL='${x.id}';render()">${x.kind==="urgent"?"Яаралтай · ":""}${esc(x.vehicle.plate)} · ${esc(x.no)}</button>`).join("")}</div>`:""}
+    <div class="sheet">${d.kind==="urgent"?`<div class="ribbon">ЯАРАЛТАЙ</div>`:""}<h2>${esc(d.no)}</h2>
+      <div class="big-plate">${esc(d.vehicle.plate)}</div>
+      <div class="sub" style="text-align:center">${esc(d.vehicle.model)} · ${d.stops.length} цех · ачигчид: ${esc(d.loaders.join(", "))}</div>
+      ${d.state==="planned"?loadForm(d):""}
+      ${d.state==="out" && !d.gate_at?`<div style="margin-top:12px"><b>II пост: харуулд уншуулна</b>
+        <div class="qr"><div data-qr="${esc(qrUrl)}"></div><div class="code">${esc(d.gate_token)}</div><small>Харуул утасныхаа камераар уншуулна, эсвэл кодыг “Пост” апп-д оруулна.</small></div></div>`:""}
+      ${d.gate_at?`<div class="alert ok" style="margin-top:12px">✔ Постоор гарсан ${fmtHM(d.gate_at)} · ${esc(d.guard)}</div>`:""}
+    </div>
+    <h3 style="margin:16px 0 4px;font-size:15px">Хүргэх дараалал</h3>
+    ${routeMap(d)}
+    ${d.stops.map((s,i)=>stopCard(d,s,i,true)).join("")}
+  </div>`;
+}
+function driverStopActions(d, s, i){
+  if (d.state!=="out" || !d.gate_at || s.state==="delivered") return "";
+  const firstOpen = d.stops.findIndex(x=>x.state!=="delivered");
+  if (i!==firstOpen) return `<p class="sub" style="margin:8px 0 0">Өмнөх цехэд хүргэсний дараа.</p>`;
+  const total = legOf(d,i);
+  const left = s.left==null ? total : s.left;
+  const pct = Math.round(100*(1-left/total));
+  const eta = Math.max(1, Math.ceil(left/SPEED*60));
+  if (s.state==="pending" || s.state==="notified") {
+    const running = SIM && SIM.d===d.id && SIM.i===i;
+    return `<div class="road" aria-hidden="true"><i style="width:${pct}%"></i></div>
+      <div class="sub">Үлдсэн ${left.toFixed(1)} км · ~${eta} мин${s.state==="notified"?" · няравт мессеж очсон ✔":` · ${NOTIFY_KM} км-т ойртоход няравт мэдэгдэнэ`}</div>
+      <div class="cp" style="margin-top:8px">
+        <button class="btn ${running?"":"primary"}" onclick="toggleDrive('${d.id}',${i})">${running?"Зогсоох":"Явах (GPS дуурайлга)"}</button>
+        <button class="btn" onclick="arrive('${d.id}',${i})">Цехэд ирлээ</button>
+      </div>`;
+  }
+  if (s.state==="arrived") {
+    const url = baseUrl() + "#recv-" + s.htoken;
+    return `<div class="alert warn" style="margin:10px 0 0">Ирсэн ${fmtHM(s.arrived_at)}. Нярав барааг тулгаж баталгаажуулна.</div>
+      <b style="display:block;margin-top:10px">1. Нярав утсаараа уншуулна</b>
+      <div class="qr"><div data-qr="${esc(url)}"></div><div class="code">${esc(s.htoken)}</div><small>Нярав камераар уншуулна, эсвэл “Миний ээлж” апп-д кодыг бичнэ.</small></div>
+      <b style="display:block">2. Няравын утсанд Odoo нээгдэхгүй бол: SMS код</b>
+      <div class="sub">Няравт 6 оронтой код мэдэгдлээр очсон. Нярав барааг шалгаад кодоо танд хэлнэ.</div>
+      <div class="line-add" style="grid-template-columns:1fr auto;margin-top:6px"><div class="inp"><input id="code-${i}" inputmode="numeric" maxlength="6" placeholder="Няравын хэлсэн код" aria-label="Няравын код"></div><button class="btn ok" onclick="verifyOtp('${d.id}',${i})">Баталгаажуулах</button></div>`;
+  }
+  return "";
+}
+function toggleDrive(did, i){
+  if (SIM) { clearInterval(SIM.t); const same = SIM.d===did && SIM.i===i; SIM=null; render(); if (same) return; }
+  SIM = {d:did, i, t:setInterval(()=>tick(did,i), 2500)}; render(); tick(did,i);
+}
+let ticking=false;
+async function tick(did, i){
+  if (ticking) return; ticking = true;
+  try {
+    const d = Store.get("deliveries", did); if (!d) { clearInterval(SIM?.t); SIM=null; return; }
+    const s = d.stops[i]; if (!s || !["pending","notified"].includes(s.state)) { clearInterval(SIM?.t); SIM=null; render(); return; }
+    const total = legOf(d,i);
+    const left = Math.max(0, (s.left==null ? total : s.left) - SIM_STEP);
+    const stops = d.stops.map((x,j)=> j===i ? {...x, left} : x);
+    let notifyNow = false;
+    if (s.state==="pending" && left <= NOTIFY_KM) { stops[i] = {...stops[i], state:"notified", notified_at: now()}; notifyNow = true; }
+    await Store.put("deliveries", did, {...d, stops});
+    if (notifyNow) {
+      const eta = Math.max(1, Math.ceil(left/SPEED*60));
+      await notify("nyarav", "Бараа ойртож байна", `Таны ${stopOrders(s).map(o=>o.no).join(", ")} захиалгын бараа ойролцоогоор ${eta} минутын дараа ${DEPTS[s.dept].name}-д хүргэгдэнэ (${left.toFixed(1)} км). Хүлээн авахад бэлэн байна уу.`, "o-"+s.orders[0], s.dept);
+      toast("Няравт мессеж очлоо", `${DEPTS[s.dept].name}: ~${eta} мин`);
+    }
+    if (left<=0) { clearInterval(SIM?.t); SIM=null; render(); }
+  } finally { ticking = false; }
+}
+async function arrive(did, i){
+  if (SIM) { clearInterval(SIM.t); SIM=null; }
+  const d = Store.get("deliveries", did); if (!d) return;
+  const s = d.stops[i];
+  const stops = d.stops.map((x,j)=> j===i ? {...x, state:"arrived", arrived_at:now(), left:0, htoken:token(6), otp:pin6()} : x);
+  await Store.put("deliveries", did, {...d, stops});
+  await notify("nyarav", "Жолооч ирлээ", `${d.vehicle.plate} ${DEPTS[s.dept].name}-д ирлээ. Барааг тулгаад жолоочийн QR-ыг уншуулна уу. Хүлээлгэн өгөх код: ${stops[i].otp}`, "recv-"+stops[i].htoken, s.dept);
+}
+async function verifyOtp(did, i){
+  const d = Store.get("deliveries", did); if (!d) return;
+  const s = d.stops[i], code = ($("#code-"+i)?.value||"").trim();
+  if (code !== s.otp) { toast("Код буруу","Няравын хэлсэн 6 оронтой кодыг дахин шалгана уу."); return; }
+  const os = stopOrders(s).map(o=>({...o, lines:o.lines.map(l=>({...l, qx: l.qi ?? l.qa}))}));
+  await finishReceive(os, "otp", d, i, os[0]?.requester || "Цехийн нярав");
+}
+
+/* ---------- Пост ---------- */
+function vPost(){
+  const waiting = Store.list("deliveries").filter(d=>d.state==="out" && !d.gate_at);
+  return `${nav("Пост")}<div class="wrap">${banner()}
+    <div class="sheet"><h2>II пост</h2>
+      <p class="sub" style="font-size:14px">Жолоочийн утсан дээрх QR-ыг утасныхаа камераар уншуулна. Камергүй бол доорх кодыг оруулна.</p>
+      <div class="line-add" style="grid-template-columns:1fr auto"><div class="inp"><label for="code-gate">Жолоочийн код</label><input id="code-gate" maxlength="6" placeholder="Жишээ: K7Q2MZ" style="text-transform:uppercase"></div>
+      <button class="btn primary" onclick="const v=$('#code-gate').value.trim().toUpperCase(); if(v) go('gate-'+v)">Шалгах</button></div>
+    </div>
+    <h3 style="margin:16px 0 8px;font-size:15px">Гарахаар хүлээж буй машин <span class="pill">${waiting.length}</span></h3>
+    ${waiting.length?`<div class="list">${waiting.map(d=>`<div class="row"><div class="main"><div class="top"><span class="no">${esc(d.vehicle.plate)}</span>${d.kind==="urgent"?`<span class="pill err">Яаралтай</span>`:""}</div><div class="meta">${esc(d.no)} · ${d.stops.length} цех</div></div><span class="pill warn">QR хүлээж буй</span></div>`).join("")}</div>`:`<div class="empty">Одоогоор алга.</div>`}
+  </div>`;
+}
+function vGate(tok){
+  const d = Store.list("deliveries").find(x=>x.gate_token===tok);
+  if (!d) return `${nav("Пост")}<div class="wrap"><div class="empty"><b>QR хүчингүй</b>Ийм кодтой хүргэлт олдсонгүй. <a href="#post">Дахин оролдох</a></div></div>`;
+  const isGuard = ME.role==="guard" || ME.role==="admin";
+  const os = d.stops.flatMap(stopOrders);
+  return `${nav("Пост")}<div class="wrap">${banner()}
+    <div class="crumb"><a href="#post">Пост</a> / ${esc(d.no)}</div>
+    <div class="sheet"><h2>Гарах зөвшөөрөл</h2>
+      <div class="big-plate">${esc(d.vehicle.plate)}</div>
+      <div class="sub" style="text-align:center">${esc(d.vehicle.model)} · жолооч ${esc(d.driver)} · ачсан ${fmtHM(d.loaded_at)}</div>
+      ${!isGuard?`<div class="alert err" style="margin-top:12px">Зөвхөн постын харуул шалгаж гаргана.</div>`:""}
+      ${d.gate_at?`<div class="alert ok" style="margin-top:12px">✔ Гарсан ${fmtT(d.gate_at)} · ${esc(d.guard)}</div>`:""}
+      <div class="tabs"><button class="on">Ачаа (${os.length} захиалга)</button></div>
+      <div class="tabpane">${os.map(o=>`<div style="margin:8px 0"><b>${esc(o.no)}</b> → ${esc(DEPTS[o.dept].name)}<div class="sub">Орлого ${esc(o.income_no||"—")} · ГЗ ${esc(o.gate_no||"—")}</div>
+        <div class="tbl-wrap"><table class="t">${o.lines.map(l=>`<tr><td>${esc(l.name)}</td><td class="n">${qtyFmt(l.qi ?? l.qa)} ${esc(l.uom)}</td></tr>`).join("")}</table></div></div>`).join("")}</div>
+      ${isGuard && !d.gate_at && d.state==="out" && !Store.readOnly?`<div class="inp" style="margin-top:10px"><label for="f-gnote">Харуулын тэмдэглэл (заавал биш)</label><input id="f-gnote"></div>
+        <button class="btn ok block" style="margin-top:10px" onclick="gatePass('${d.id}')">Шалгасан, гаргах</button>`:""}
+    </div></div>`;
+}
+async function gatePass(did){
+  const d = Store.get("deliveries", did); if (!d || d.gate_at) return;
+  const note = ($("#f-gnote")?.value||"").trim();
+  for (const st of d.stops) for (const oid of st.orders) { const o = Store.get("orders", oid); if (o && o.step===SI.gate) await advance(o, note || "Постоор гарав"); }
+  await Store.put("deliveries", did, {...Store.get("deliveries", did), gate_at: now(), guard: ME.name});
+  await notify("driver", "Постоор гарлаа", `${d.vehicle.plate} — хамгийн ойрын ${DEPTS[d.stops[0].dept].name}-с эхэлнэ.`, "drv");
+  toast("Гаргалаа", d.vehicle.plate+" постоор гарлаа.");
+}
+
+/* ---------- Нярав хүлээн авах ---------- */
+function vRecv(tok){
+  let d=null, i=-1;
+  for (const x of Store.list("deliveries")) { const j = x.stops.findIndex(s=>s.htoken===tok); if (j>=0) { d=x; i=j; break; } }
+  if (!d) return `${nav("Хүлээн авах")}<div class="wrap"><div class="empty"><b>QR хүчингүй</b>Энэ код хүчингүй эсвэл бараа аль хэдийн хүлээлгэн өгөгдсөн.</div></div>`;
+  const s = d.stops[i];
+  const allowed = ME.role==="admin" || (ME.role==="nyarav" && ME.dept===s.dept);
+  if (s.state==="delivered") return `${nav("Хүлээн авах")}<div class="wrap"><div class="alert ok">✔ Хүлээн авсан ${fmtT(s.delivered_at)} · ${esc(s.received_by)}</div></div>`;
+  const os = stopOrders(s);
+  return `${nav("Хүлээн авах")}<div class="wrap">${banner()}
+    <div class="sheet"><h2>Бараа хүлээн авах</h2>
+      <div class="sub" style="font-size:14px">${esc(DEPTS[s.dept].name)} · машин ${esc(d.vehicle.plate)} · жолооч ${esc(d.driver)}</div>
+      ${!allowed?`<div class="alert err" style="margin-top:12px">Зөвхөн ${esc(DEPTS[s.dept].name)}-ийн нярав хүлээн авна.</div>`:`
+      <p class="sub" style="font-size:14px">Тоог тулгаж шалгаад зөрвөл бодит хүлээн авсан тоог бичнэ үү.</p>
+      ${os.map(o=>`<div style="margin-top:10px"><b>${esc(o.no)}</b><div class="tbl-wrap"><table class="t"><tr><th>Бараа</th><th class="n">Ирсэн</th><th class="n">Хүлээн авсан</th></tr>
+        ${o.lines.map((l,li)=>`<tr><td>${esc(l.name)}<div class="sub">${esc(l.code)}</div></td><td class="n">${qtyFmt(l.qd ?? l.qi ?? l.qa)} ${esc(l.uom)}</td><td class="n"><input id="q-${o.id}-${li}" type="number" step="any" min="0" value="${l.qd ?? l.qi ?? l.qa}" aria-label="Хүлээн авсан тоо"></td></tr>`).join("")}
+      </table></div></div>`).join("")}
+      <div class="inp" style="margin-top:10px"><label for="f-rnote">Тэмдэглэл (гэмтэл, дутуу гэх мэт)</label><input id="f-rnote"></div>
+      ${Store.readOnly?"":`<button class="btn ok block" style="margin-top:12px" onclick="recvConfirm('${d.id}',${i})">Тулгаж шалгасан, хүлээн авлаа</button>`}`}
+    </div></div>`;
+}
+async function recvConfirm(did, i){
+  const d = Store.get("deliveries", did); if (!d) return;
+  const s = d.stops[i];
+  const note = ($("#f-rnote")?.value||"").trim();
+  const os = stopOrders(s).map(o=>({...o, recv_note: note, lines:o.lines.map((l,li)=>{ const v = parseFloat($(`#q-${o.id}-${li}`)?.value); return {...l, qx: v>=0 ? v : (l.qd ?? l.qi ?? l.qa)}; })}));
+  await finishReceive(os, "qr", d, i, ME.name);
+}
+async function finishReceive(orders, method, d, i, receiver){
+  receiver = receiver || ME.name; makeAct.extra = 0;
+  for (let o of orders) {
+    const diff = o.lines.filter(l => l.qx !== (l.qd ?? l.qi ?? l.qa)).map(l=>({...l, exp:(l.qd ?? l.qi ?? l.qa), got:l.qx}));
+    o.discrepancy = diff.length>0 || (o.acts||[]).length>0;
+    o.handover = method;
+    const act = diff.length ? makeAct(o, "recv", diff, receiver) : null;
+    await advance(o, (method==="qr"?"QR уншуулж":method==="otp"?"SMS кодоор":"Маягтаар") + " хүлээн авав" + (o.recv_note?": "+o.recv_note:"") + (o.discrepancy?" (зөрүүтэй)":""), receiver);
+    if (act) await announceAct(o, act);
+  }
+  if (!d) { const did = orders[0]?.delivery; d = did ? Store.get("deliveries", did) : null; if (d) i = d.stops.findIndex(s=>s.orders.includes(orders[0].id)); }
+  if (d && i>=0) {
+    const fresh = Store.get("deliveries", d.id);
+    const stops = fresh.stops.map((x,j)=> j===i ? {...x, state:"delivered", delivered_at: now(), received_by: receiver, method, htoken:null} : x);
+    const done = stops.every(x=>x.state==="delivered");
+    await Store.put("deliveries", d.id, {...fresh, stops, state: done ? "done" : fresh.state, done_at: done ? now() : null});
+    await notify("driver", "Хүлээлгэн өглөө", `${DEPTS[fresh.stops[i].dept].name}${done?" — бүх цехэд хүргэж дууслаа.":" — дараагийн цех рүү явна уу."}`, "drv");
+  }
+  toast("Хүлээн авлаа", orders.map(o=>o.no).join(", ") + " цахимаар баталгаажлаа.");
+  if (VIEW.startsWith("recv-")) go("o-"+orders[0].id);
+}
+
+/* ---------- Буцаалт ---------- */
+let RDRAFT = null, RFILTER = "open";
+const RSTATES = [["requested","Хүсэлт илгээсэн"],["picked","Жолооч ачсан"],["received","БМТС хүлээн авсан"]];
+const rState = r => r.state==="requested"?["Ачиж авахыг хүлээж буй","warn"]:r.state==="picked"?["Замд, БМТС руу","info"]:["БМТС хүлээн авсан","ok"];
+function nextReturnNo(){
+  const used = Store.list("returns").map(r=>parseInt(String(r.no).split("/").pop(),10)||0);
+  return "БЦ/2026/" + String((used.length?Math.max(...used):0)+1).padStart(4,"0");
+}
+function retRow(r){
+  const [l,c] = rState(r);
+  return `<div class="row" onclick="go('r-${r.id}')"><div class="main"><div class="top"><span class="no">${esc(r.no)}</span><span class="pill">${esc(r.reason)}</span></div>
+    <div class="meta">${esc(DEPTS[r.dept].name)} · ${r.lines.length} мөр${r.order_no?" · "+esc(r.order_no):""}</div></div><span class="pill ${c}">${l}</span></div>`;
+}
+function vReturns(){
+  let list = Store.list("returns").sort((a,b)=>b.created-a.created);
+  if (ME.role==="nyarav" && ME.dept) list = list.filter(r=>r.dept===ME.dept);
+  if (RFILTER==="open") list = list.filter(r=>r.state!=="received");
+  if (RFILTER==="done") list = list.filter(r=>r.state==="received");
+  const canNew = (ME.role==="nyarav" || ME.role==="admin") && !Store.readOnly;
+  return `${nav("Буцаалт")}<div class="wrap">${banner()}
+    <div class="cp">${canNew?`<button class="btn primary" onclick="RDRAFT=null;go('ret-new')">Шинэ буцаалт</button>`:""}<span class="sp"></span><span class="sub">${list.length} буцаалт</span></div>
+    <div class="filters">${[["open","Идэвхтэй"],["all","Бүгд"],["done","Хүлээн авсан"]].map(([k,n])=>`<button class="${RFILTER===k?"on":""}" onclick="RFILTER='${k}';render()">${n}</button>`).join("")}</div>
+    <p class="sub" style="margin:0 0 8px">Гэмтэлтэй, буруу, илүү ирсэн бараа, хаягдал сэлбэгийг БМТС руу буцаана. Тэр цех рүү очих машин ачиж авна.</p>
+    ${list.length?`<div class="list">${list.map(retRow).join("")}</div>`:`<div class="empty"><b>Буцаалт алга</b>${canNew?"Хүлээн авсан захиалга дээрээс эсвэл “Шинэ буцаалт” товчоор үүсгэнэ.":""}</div>`}
+  </div>`;
+}
+function vRetNew(orderId){
+  if (!["nyarav","admin"].includes(ME.role)) return `${nav("Буцаалт")}<div class="wrap"><div class="empty"><b>Зөвхөн цехийн нярав буцаалт үүсгэнэ</b></div></div>`;
+  const o = orderId ? Store.get("orders", orderId) : null;
+  if (!RDRAFT || RDRAFT.order!==(o?.id||null)) RDRAFT = {order:o?.id||null, dept: o?.dept || (ME.dept && !DEPTS[ME.dept]?.hidden ? ME.dept : deptList()[0][0]), reason: o ? RETURN_REASONS[0] : RETURN_REASONS[3], note:"", free:[]};
+  const r = RDRAFT;
+  const lines = o ? o.lines.map((l,i)=>`<tr><td>${esc(l.name)}<div class="sub">${esc(l.code)}</div></td><td class="n">${qtyFmt(l.qx ?? l.qi ?? l.qa)} ${esc(l.uom)}</td><td class="n"><input id="rq-${i}" type="number" min="0" max="${l.qx ?? l.qi ?? l.qa}" step="any" value="0" aria-label="Буцаах тоо"></td></tr>`).join("")
+    : r.free.map((l,i)=>`<tr><td>${esc(l.name)}</td><td class="n">${qtyFmt(l.q)} ${esc(l.uom)}</td><td class="n"><button class="btn" aria-label="Устгах" onclick="RDRAFT.free.splice(${i},1);render()">✕</button></td></tr>`).join("");
+  return `${nav("Буцаалт")}<div class="wrap">${banner()}
+    <div class="crumb"><a href="#ret">Буцаалт</a> / Шинэ${o?` · <a href="#o-${o.id}">${esc(o.no)}</a>`:""}</div>
+    <div class="cp"><button class="btn primary" onclick="submitReturn()">Илгээх</button><button class="btn" onclick="RDRAFT=null;history.back()">Болих</button></div>
+    <div class="sheet"><h2>Бараа буцаах</h2>
+      <div class="fields">
+        <div class="inp"><label for="rn-dept">Цех</label><select id="rn-dept" onchange="RDRAFT.dept=this.value" ${o||ME.role!=="admin"?"disabled":""}>${deptList().map(([k,v])=>`<option value="${k}" ${r.dept===k?"selected":""}>${esc(v.name)}</option>`).join("")}</select></div>
+        <div class="inp"><label for="rn-reason">Шалтгаан</label><select id="rn-reason" onchange="RDRAFT.reason=this.value">${RETURN_REASONS.map(x=>`<option ${r.reason===x?"selected":""}>${x}</option>`).join("")}</select></div>
+      </div>
+      <div class="inp" style="margin-top:8px"><label for="rn-note">Тайлбар</label><input id="rn-note" value="${esc(r.note)}" oninput="RDRAFT.note=this.value" placeholder="Жишээ: Холхивчийн гадна цагираг хагарсан"></div>
+      <div class="tabs"><button class="on">${o?"Захиалгын бараа: буцаах тоог бичнэ":"Буцаах бараа"}</button></div>
+      <div class="tabpane">
+        ${lines?`<div class="tbl-wrap"><table class="t"><tr><th>Бараа</th><th class="n">${o?"Хүлээн авсан":"Тоо"}</th><th class="n">${o?"Буцаах":""}</th></tr>${lines}</table></div>`:`<p class="sub">Бараа нэмнэ үү.</p>`}
+        ${o?"":`<div class="line-add" style="margin-top:10px;grid-template-columns:2fr 1fr 1fr auto">
+          <div class="inp"><label for="rn-name">Бараа</label><input id="rn-name" placeholder="Жишээ: Хуучин аккумлятор"></div>
+          <div class="inp"><label for="rn-q">Тоо</label><input id="rn-q" type="number" min="0.01" step="any" value="1"></div>
+          <div class="inp"><label for="rn-uom">Нэгж</label><input id="rn-uom" value="ширхэг"></div>
+          <button class="btn" onclick="addRetLine()">Нэмэх</button></div>`}
+      </div>
+    </div></div>`;
+}
+function addRetLine(){
+  const name = ($("#rn-name").value||"").trim(), q = parseFloat($("#rn-q").value), uom = ($("#rn-uom").value||"").trim() || "ширхэг";
+  if (!name || !(q>0)) { toast("Бараа, тоо бичнэ үү","Барааны нэр болон 0-ээс их тоо оруулна."); return; }
+  RDRAFT.free.push({name, q, uom}); ["rn-name","rn-q"].forEach(k=>DIRTY.delete(k)); render();
+}
+async function submitReturn(){
+  const r = RDRAFT; if (!r) return;
+  const o = r.order ? Store.get("orders", r.order) : null;
+  let lines;
+  if (o) lines = o.lines.map((l,i)=>({name:l.name, code:l.code, uom:l.uom, q: Math.min(parseFloat($("#rq-"+i)?.value)||0, l.qx ?? l.qi ?? l.qa)})).filter(l=>l.q>0);
+  else lines = r.free.map(l=>({...l}));
+  if (!lines.length) { toast("Буцаах бараа алга", o?"Дор хаяж нэг барааны буцаах тоог бичнэ үү.":"Бараа нэмнэ үү."); return; }
+  const id = uid();
+  const doc = {no: nextReturnNo(), dept: r.dept, order: o?.id||null, order_no: o?.no||null, reason: r.reason, note: (r.note||"").trim(), lines, state:"requested", by: ME.name, created: now()};
+  await Store.put("returns", id, doc);
+  RDRAFT = null; DIRTY.clear();
+  await notify("dispatcher", "Буцаалт: "+doc.no, `${DEPTS[doc.dept].name} · ${doc.reason} · ${lines.length} мөр. Тэр цех рүү очих машин ачиж авна.`, "r-"+id);
+  await notify("driver", "Буцааж авах бараа", `${DEPTS[doc.dept].name}: ${doc.no} (${lines.length} мөр).`, "r-"+id);
+  await notify("keeper", "Буцаж ирэх бараа: "+doc.no, `${DEPTS[doc.dept].name} · ${doc.reason}`, "r-"+id);
+  toast("Илгээлээ", doc.no+" буцаалтын хүсэлт илгээгдлээ.");
+  go("r-"+id);
+}
+function vReturn(id){
+  const r = Store.get("returns", id);
+  if (!r) return `${nav("Буцаалт")}<div class="wrap"><div class="empty"><b>Буцаалт олдсонгүй</b><a href="#ret">Жагсаалт руу</a></div></div>`;
+  const [l,c] = rState(r), ci = RSTATES.findIndex(x=>x[0]===r.state);
+  const canPick = r.state==="requested" && ["driver","dispatcher","admin"].includes(ME.role) && !Store.readOnly;
+  const canRecv = r.state==="picked" && ["keeper","admin"].includes(ME.role) && !Store.readOnly;
+  return `${nav("Буцаалт")}<div class="wrap">${banner()}
+    <div class="crumb"><a href="#ret">Буцаалт</a> / ${esc(r.no)}</div>
+    <div class="cp">${canPick?`<button class="btn primary" onclick="pickReturn('${id}')">Машинд ачиж авлаа</button>`:""}${canRecv?`<button class="btn ok" onclick="recvReturn('${id}')">БМТС хүлээн авлаа</button>`:""}<span class="sp"></span></div>
+    <div class="tl">${RSTATES.map(([k,n],i)=>`<span class="${i<ci||r.state==="received"?"done":i===ci?"cur":""}">${n}</span>`).join("")}</div>
+    <div class="sheet"><h2>${esc(r.no)}</h2>
+      <div class="fields">
+        <div class="f"><label>Цех</label><div>${esc(DEPTS[r.dept].name)}</div></div>
+        <div class="f"><label>Шалтгаан</label><div>${esc(r.reason)}</div></div>
+        <div class="f"><label>Захиалга</label><div>${r.order?`<a href="#o-${r.order}">${esc(r.order_no)}</a>`:"—"}</div></div>
+        <div class="f"><label>Төлөв</label><div><span class="pill ${c}">${l}</span></div></div>
+        <div class="f"><label>Хүсэлт</label><div>${esc(r.by)} · ${fmtT(r.created)}</div></div>
+        <div class="f"><label>Ачсан</label><div>${r.picked_at?esc(r.picked_by)+" · "+fmtT(r.picked_at):"—"}</div></div>
+        <div class="f"><label>БМТС хүлээн авсан</label><div>${r.received_at?esc(r.received_by)+" · "+fmtT(r.received_at):"—"}</div></div>
+        <div class="f"><label>Тайлбар</label><div>${esc(r.note||"—")}</div></div>
+      </div>
+      <div class="tabs"><button class="on">Бараа</button></div>
+      <div class="tabpane"><div class="tbl-wrap"><table class="t"><tr><th>Бараа</th><th class="n">Буцаасан</th><th class="n">БМТС-д ирсэн</th></tr>
+        ${r.lines.map((x,i)=>`<tr><td>${esc(x.name)}${x.code?`<div class="sub">${esc(x.code)}</div>`:""}</td><td class="n">${qtyFmt(x.q)} ${esc(x.uom)}</td><td class="n">${canRecv?`<input id="rq-${i}" type="number" min="0" step="any" value="${x.q}" aria-label="Ирсэн тоо">`:x.qr==null?"—":`<span class="${x.qr!==x.q?"pill err":""}">${qtyFmt(x.qr)}</span>`}</td></tr>`).join("")}
+      </table></div>
+      ${canRecv?`<div class="inp" style="margin-top:8px"><label for="rn-rnote">БМТС-ийн тэмдэглэл</label><input id="rn-rnote" placeholder="Жишээ: Агуулахын хаягдлын хэсэгт байршуулав"></div>`:r.recv_note?`<p class="sub">БМТС: ${esc(r.recv_note)}</p>`:""}
+      </div>
+    </div></div>`;
+}
+async function pickReturn(id, plate){
+  const r = Store.get("returns", id); if (!r || r.state!=="requested") return;
+  await Store.put("returns", id, {...r, state:"picked", picked_at: now(), picked_by: ME.name + (plate?" ("+plate+")":"")});
+  await notify("keeper", "Буцаалт замд: "+r.no, `${DEPTS[r.dept].name}-ээс ачиж авлаа. БМТС-д ирэхэд хүлээн авна уу.`, "r-"+id);
+  await notify("nyarav", "Буцаалтыг ачиж авлаа", `${r.no} БМТС руу явж байна.`, "r-"+id, r.dept);
+  toast("Ачиж авлаа", r.no);
+}
+async function recvReturn(id){
+  const r = Store.get("returns", id); if (!r || r.state!=="picked") return;
+  const lines = r.lines.map((x,i)=>{ const v = parseFloat($("#rq-"+i)?.value); return {...x, qr: v>=0 ? v : x.q}; });
+  const note = ($("#rn-rnote")?.value||"").trim(); DIRTY.clear();
+  await Store.put("returns", id, {...r, lines, state:"received", received_at: now(), received_by: ME.name, recv_note: note, diff: lines.some(x=>x.qr!==x.q)});
+  await notify("nyarav", "Буцаалтыг БМТС хүлээн авлаа", `${r.no}${lines.some(x=>x.qr!==x.q)?" (тоо зөрүүтэй)":""}`, "r-"+id, r.dept);
+  toast("Хүлээн авлаа", r.no);
+}
+/* Жолоочийн зогсоол дээр тухайн цехийн буцаах бараа */
+function stopReturns(d, s, driver){
+  const rs = Store.list("returns").filter(r=>r.dept===s.dept && (r.state==="requested" || r.state==="picked" && r.picked_by && r.picked_by.includes(d.vehicle.plate)));
+  if (!rs.length) return "";
+  const can = driver && d.state==="out" && d.gate_at && ["driver","dispatcher","admin"].includes(ME.role) && !Store.readOnly;
+  return `<div class="retbox"><b>Буцааж авах бараа</b>${rs.map(r=>`<div style="display:flex;gap:8px;align-items:center;margin-top:6px"><div style="flex:1;min-width:0"><a href="#r-${r.id}">${esc(r.no)}</a> <span class="sub">${esc(r.reason)} · ${r.lines.map(x=>esc(x.name)+" "+qtyFmt(x.q)+" "+esc(x.uom)).join("; ")}</span></div>
+    ${r.state==="picked"?`<span class="pill info">Ачсан</span>`:can?`<button class="btn" onclick="pickReturn('${r.id}','${esc(d.vehicle.plate)}')">Ачиж авлаа</button>`:""}</div>`).join("")}</div>`;
+}
+
+/* ---------- Тайлан: үе шат тус бүрийг тусад нь ---------- */
+const lastH = (o,k) => { for (let i=o.history.length-1;i>=0;i--) if (o.history[i].k===k) return o.history[i].at; return null; };
+function phases(o){
+  const appr = lastH(o,"bmts"), ready = lastH(o,"sdisp"), recv = lastH(o,"receive");
+  return {
+    appr: appr ? appr - o.created : null,          // илгээснээс БМТС-ийн дарга батлах хүртэл
+    wh:   appr && ready ? ready - appr : null,     // БМТС хүлээн авснаас гарах бичиг хүртэл
+    dlv:  ready && recv ? recv - ready : null,     // ачихад бэлэн болсноос цехэд хүлээлгэн өгөх хүртэл
+  };
+}
+const avg = a => a.length ? a.reduce((x,y)=>x+y,0)/a.length : null;
+function vReport(){
+  const os = Store.list("orders");
+  const done = os.filter(o=>o.step>=STEPS.length), active = os.filter(o=>o.step<STEPS.length && !o.rejected);
+  const ph = os.map(o=>({o, ...phases(o)}));
+  const col = (k, f) => ph.filter(x=>x[k]!=null && (!f || f(x.o))).map(x=>x[k]);
+  const PH = [["appr","Батлалт","Илгээснээс бүх гарын үсэг (БМТС-ийн дарга) хүртэл"],["wh","БМТС склад","Хүлээн авснаас бэлтгэж, гарах бичиг авах хүртэл"],["dlv","Хүргэлт","Ачихад бэлэн болсноос цехэд хүлээлгэн өгөх хүртэл"]];
+  // батлалтын шат бүр: хэн дээр удаж байна
+  const per = {};
+  os.forEach(o=>{ let prev=o.created; o.history.forEach(h=>{ if(h.role!=="system" && h.k!=="submit" && h.k!=="reject"){ (per[h.k]=per[h.k]||[]).push(h.at-prev);} prev=h.at; }); });
+  const apprSteps = ["head","supply","senior","bmts"], whSteps = ["accept","issue","gdisp","sdisp"], dlSteps = ["load","gate","receive"];
+  const bars = keys => { const rows = STEPS.filter(s=>keys.includes(s.k) && per[s.k]).map(s=>({n:s.n, v:avg(per[s.k])})); const mx = Math.max(1,...rows.map(r=>r.v));
+    return rows.length ? `<div class="bars">${rows.map(r=>`<div class="bar"><span>${esc(r.n)}</span><div class="tr"><i style="width:${Math.max(2,Math.round(100*r.v/mx))}%"></i></div><span class="v">${dur(r.v)}</span></div>`).join("")}</div>` : `<div class="sub">Өгөгдөл алга.</div>`; };
+  const slow = STEPS.filter(s=>apprSteps.includes(s.k) && per[s.k]).sort((a,b)=>avg(per[b.k])-avg(per[a.k]))[0];
+  // хүргэлт
+  const dls = Store.list("deliveries");
+  const road = dls.filter(d=>d.gate_at && d.done_at).map(d=>d.done_at-d.gate_at);
+  const urgD = dls.filter(d=>d.kind==="urgent");
+  // буцаалт
+  const rets = Store.list("returns");
+  const byReason = RETURN_REASONS.map(x=>[x, rets.filter(r=>r.reason===x).length]).filter(x=>x[1]);
+  const pickT = rets.filter(r=>r.picked_at).map(r=>r.picked_at-r.created), fullT = rets.filter(r=>r.received_at).map(r=>r.received_at-r.created);
+  return `${nav("Тайлан")}<div class="wrap">${banner()}
+    <div class="kpis">
+      <div class="kpi"><div class="v">${os.length}</div><div class="l">Нийт захиалга</div></div>
+      <div class="kpi"><div class="v">${active.length}</div><div class="l">Явцад байгаа</div></div>
+      <div class="kpi"><div class="v">${done.length}</div><div class="l">Хүлээлгэн өгсөн</div></div>
+      <div class="kpi"><div class="v">${os.filter(o=>o.urgent).length}</div><div class="l">Үүнээс яаралтай</div></div>
+      <div class="kpi"><div class="v">${done.filter(o=>o.discrepancy).length}</div><div class="l">Зөрүүтэй хүлээн авалт</div></div>
+      <div class="kpi"><div class="v">0 км</div><div class="l">Цехийн нярав явсан зам</div></div>
+    </div>
+
+    <div class="sheet"><h2 style="font-size:17px">Хаана хугацаа зарцуулж байна вэ</h2>
+      <p class="sub" style="margin:0">Захиалгын нийт хугацааг 3 үе шатад хуваана. Аль нь удааширч байгааг тусад нь харна.</p>
+      <div class="phase">${PH.map(([k,n,d])=>`<div><div class="l">${n}</div><div class="v">${dur(avg(col(k)))}</div><div class="n">${d}</div><div class="n">${col(k).length} захиалга</div></div>`).join("")}</div>
+      <div class="tbl-wrap"><table class="t"><tr><th>Дундаж</th>${PH.map(([k,n])=>`<th class="n">${n}</th>`).join("")}</tr>
+        <tr><td>Хуваарьт</td>${PH.map(([k])=>`<td class="n">${dur(avg(col(k,o=>!o.urgent)))}</td>`).join("")}</tr>
+        <tr><td><span class="pill err">Яаралтай</span></td>${PH.map(([k])=>`<td class="n">${dur(avg(col(k,o=>o.urgent)))}</td>`).join("")}</tr>
+      </table></div>
+    </div>
+
+    <div class="sheet" style="margin-top:12px"><h2 style="font-size:17px">1. Батлалт: шат бүрийн хүлээсэн хугацаа</h2>
+      ${slow?`<div class="alert warn">Хамгийн удаан: <b>${esc(slow.n)}</b> (дунджаар ${dur(avg(per[slow.k]))})</div>`:""}
+      ${bars(apprSteps)}
+    </div>
+    <div class="sheet" style="margin-top:12px"><h2 style="font-size:17px">2. БМТС склад</h2>${bars(whSteps)}</div>
+    <div class="sheet" style="margin-top:12px"><h2 style="font-size:17px">3. Хүргэлт</h2>
+      ${bars(dlSteps)}
+      <div class="fields" style="margin-top:10px">
+        <div class="f"><label>Хүргэлт</label><div>${dls.length} (яаралтай ${urgD.length})</div></div>
+        <div class="f"><label>Постоос гараад бүгдийг хүргэх</label><div>${dur(avg(road))}</div></div>
+      </div>
+    </div>
+    <div class="sheet" style="margin-top:12px"><h2 style="font-size:17px">Буцаалт</h2>
+      <div class="fields">
+        <div class="f"><label>Нийт</label><div>${rets.length} · идэвхтэй ${rets.filter(r=>r.state!=="received").length}</div></div>
+        <div class="f"><label>Хүсэлтээс ачиж авах хүртэл</label><div>${dur(avg(pickT))}</div></div>
+        <div class="f"><label>Хүсэлтээс БМТС хүлээн авах хүртэл</label><div>${dur(avg(fullT))}</div></div>
+      </div>
+      ${byReason.length?`<div class="bars" style="margin-top:10px">${byReason.map(([n,v])=>`<div class="bar"><span>${esc(n)}</span><div class="tr"><i style="width:${Math.round(100*v/Math.max(...byReason.map(x=>x[1])))}%"></i></div><span class="v">${v}</span></div>`).join("")}</div>`:""}
+      <p class="sub" style="margin-top:10px">Шалтгаанаар ангилсан нь нийлүүлэгч, гэрээ, бэлтгэлийн алдааг илрүүлэхэд хэрэгтэй.</p>
+    </div>
+    <p class="sub" style="margin-top:12px">Цаасан процесст нэг шаардахад цехийн нярав 20–32 км явж, 2–15 цаг зарцуулдаг байсан (Цахилгаан, Авто тээврийн, УМ цехийн хэмжилт).</p>
+  </div>`;
+}
+
+/* ---------- Мэдэгдэл ---------- */
+let NTAB = "app";
+function vNotifs(){
+  const list = Notif.mine();
+  return `${nav("Мэдэгдэл")}<div class="wrap">${banner()}
+    <div class="cp"><button class="btn" onclick="Notif.markAll()">Бүгдийг уншсан</button><span class="sp"></span><span class="sub">${esc(roleName(ME.role))}</span></div>
+    <div class="filters">${[["app","Апп доторх мэдэгдэл"],["sms","Утсанд очих мессеж"]].map(([k,n])=>`<button class="${NTAB===k?"on":""}" onclick="NTAB='${k}';render()">${n}</button>`).join("")}</div>
+    ${!list.length?`<div class="empty"><b>Мэдэгдэл алга</b>Таны гарын үсгийн ээлж ирэх, бараа ойртох үед энд гарна.</div>`:
+      NTAB==="sms"?`<p class="sub" style="margin:0 0 10px">Мэдэгдэл бүр утасны дугаарт мессежээр давхар очих текст. Мессеж бодитоор илгээгдэхийн тулд Odoo-д үүрэн операторын мессежийн үйлчилгээ холбогдсон байх ёстой.</p>
+        ${list.map(n=>`<div class="sms">БМТС: ${esc(n.title)}. ${esc(n.body)}<span class="when">${fmtT(n.at)}</span></div>`).join("")}`:
+      `<div class="list">${list.map(n=>`<div class="ntf ${Notif.seen.has(n.id)?"":"unread"}" onclick="Notif.mark('${n.id}');go('${esc(n.link||"home")}')"><div style="flex:1;min-width:0"><div class="tt">${esc(n.title)}</div><div class="tb">${esc(n.body)}</div></div><span class="when">${fmtHM(n.at)}</span></div>`).join("")}</div>`}
+  </div>`;
+}
+
+/* ---------- Тохиргоо ---------- */
+function vMe(){
+  return `${nav("Миний тохиргоо")}<div class="wrap">${banner()}
+    <div class="sheet"><h2>${esc(ME.name)}</h2>
+      <div class="f"><label>Дүр</label><div>${esc(roleName(ME.role))}</div></div>
+      ${ME.dept?`<div class="f"><label>Цех</label><div>${esc(DEPTS[ME.dept].name)}</div></div>`:""}
+      ${ME.cat?`<div class="f"><label>Хариуцсан ангилал</label><div>${esc(CATS[ME.cat])}</div></div>`:""}
+      ${ME.shift?`<div class="f"><label>Ээлж</label><div>${ME.shift}-р ээлж · одоо жижүүрт: ${esc(dutyLabel())}</div></div>`:""}
+      <div class="f"><label>Горим</label><div>${Store.mode==="shared"?"Хуваалцсан (бүх гишүүн)":"Зөвхөн энэ утсанд"}</div></div>
+      <div class="cp" style="margin-top:12px"><button class="btn primary" onclick="ME=null;render()">Дүр солих</button></div>
+    </div>
+    <div class="sheet" style="margin-top:12px;text-align:center"><h2 style="font-size:17px;text-align:left">Аппыг өөр утсанд нээх</h2>
+      <p class="sub" style="font-size:14px;text-align:left">Нөгөө хүн утасныхаа камерыг энэ QR-д чиглүүлээд гарч ирсэн холбоосыг дарна.</p>
+      <div class="qr"><div data-qr="${esc(baseUrl())}"></div></div>
+      <p class="sub" style="word-break:break-all">${esc(baseUrl())}</p>
+    </div>
+    ${ME.role==="admin"?`<div class="sheet" style="margin-top:12px"><h2 style="font-size:17px">Өгөгдөл цэвэрлэх</h2>
+      <p class="sub" style="font-size:14px">Бүх захиалга, хүргэлт, буцаалт, мэдэгдлийг устгана.</p>
+      ${CONFIRM==="wipe"?`<div class="confirm"><b>Бүх өгөгдлийг устгах уу?</b> Бусад гишүүдийн утсан дээр ч устна.<div class="cp" style="margin-top:8px"><button class="btn danger" onclick="wipe()">Тийм, устгах</button><button class="btn" onclick="CONFIRM=null;render()">Болих</button></div></div>`:
+      `<button class="btn danger" onclick="CONFIRM='wipe';render()">Бүгдийг устгах</button>`}</div>`:""}
+  </div>`;
+}
+async function wipe(){
+  CONFIRM=null;
+  for (const c of COLLS) for (const x of Store.list(c)) await Store.del(c, x.id);
+  toast("Цэвэрлэлээ","Бүх өгөгдөл устлаа.");
+}
+
+/* ---------- QR ---------- */
+function baseUrl(){ return ART_URL || location.href.split("#")[0]; }
+function drawQRs(){
+  if (!window.QRCode) return;
+  document.querySelectorAll("[data-qr]").forEach(el=>{
+    if (el.dataset.done===el.dataset.qr) return;
+    el.innerHTML=""; el.dataset.done = el.dataset.qr;
+    try { new QRCode(el, {text: el.dataset.qr, width: 210, height: 210, correctLevel: QRCode.CorrectLevel.M}); } catch {}
+  });
+}
+
+Store.init();
+render();
+</script>
+
+</body>
+</html>
